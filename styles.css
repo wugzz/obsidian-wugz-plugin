@@ -6,3 +6,67 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.w-video{
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.w-video-read{
+    border: 2px solid var(--caret-color);
+}
+
+
+
+.w-card,
+.w-tip{
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    position: relative;
+    overflow: hidden;
+    gap: 10px;
+    cursor: default;
+}
+
+.w-card::before {
+    content: "";
+    height: 100px;
+    width: 100px;
+    position: absolute;
+    top: -40%;
+    left: -24%;
+    border-radius: 50%;
+    border: 35px solid rgba(255, 255, 255, 0.102);
+    transition: all .8s ease;
+    filter: blur(.5rem);
+}
+
+
+  
+.w-card:hover::before {
+    width: 140px;
+    height: 140px;
+    top: -30%;
+    left: 60%;
+    filter: blur(0rem);
+}
+
+.w-card .title,
+.w-tip .title{
+    flex-grow: 1;
+    display: flex;
+    font-weight: 900;
+    font-size: 1.2em;
+    align-items: center;
+    gap: 10px;
+}
+  
+.w-card .desc{
+    font-weight: 300;
+}
+
+.w-tip{
+    border: 1px solid var(--caret-color);
+}
