@@ -9,6 +9,12 @@ export default class UrlConst {
 	public static readonly GET_CODE_INFO =
 		"http://localhost:5678/webhook/getCodeInfo";
 
+	public static readonly GET_SUBS_INFO =
+		"http://localhost:5678/webhook/getSubs";
+
+	public static readonly DOWNLOAD_FILE =
+		"http://localhost:5678/webhook/download";
+
 	public static readonly CACHE_CODES_PATH =
 		"E:\\workspace\\n8n\\.cache\\jav\\codes\\";
 

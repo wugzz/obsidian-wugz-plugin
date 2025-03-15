@@ -14,11 +14,14 @@ import Utils from "src/utils/Utils";
 import UrlConst from "src/utils/UrlConst";
 
 import * as fs from "fs";
+import GFriends from "src/utils/GFriends";
+import { Notice } from "obsidian";
 
 interface IProp {
 	data: ICodeInfo;
 	cover?: string;
 	code: string;
+	path: string;
 }
 
 export default class PageCode extends UI<IProp> {
@@ -29,7 +32,9 @@ export default class PageCode extends UI<IProp> {
 	render() {
 		const { data, cover, code } = this.props;
 
-		if (!data)
+		console.log("render data", data);
+
+		if (!data.title)
 			return `
         <img src="${cover}" alt=""  class='w-br'/>
         <wie-area class='items-center'>
@@ -46,12 +51,32 @@ export default class PageCode extends UI<IProp> {
             <wie-area>
                 <wie-title>${data.title}</wie-title>
                 <wie-line-wrap>
-                    <wie-tag>${data.code}</wie-tag>
+                    <wie-tag onclick='copy' data-copy='${data.code}'>${
+			data.code
+		}</wie-tag>
                     ${data.zh ? `<wie-tag>中字</wie-tag>` : ""}
                     ${data.leak ? `<wie-tag>英字</wie-tag>` : ""}
                     ${data.und ? `<wie-tag>4K</wie-tag>` : ""}
                     ${this.renderScore("JavDB", data.score)}
                     <wie-item>${SVGConst.Publish} ${data.releaseDate}</wie-item>
+                    
+                </wie-line-wrap>
+                <wie-line-wrap>
+                ${this.renderButton(
+					data as any,
+					"link",
+					"JavDB",
+					SVGConst.Detail
+				)}
+                <wie-btn onclick='updateCode'>${
+					SVGConst.Refresh
+				}更新番号信息</wie-btn>
+                <wie-btn onclick='open' data-path='${this.videoFolder}'>${
+			SVGConst.Copy
+		}打开视频目录</wie-btn>
+        <wie-btn onclick='play' data-path='${this.props.path}'>${
+			SVGConst.Play
+		}播放视频</wie-btn>
                 </wie-line-wrap>
                 ${this.renderEmbyTag(data)}
             </wie-area>
@@ -65,6 +90,20 @@ export default class PageCode extends UI<IProp> {
             ${this.renderMangets()}
         </div>
         `;
+	}
+
+	open(e: Event) {
+		const btn = e.currentTarget as HTMLElement;
+		const path = btn.getAttribute("data-path")!;
+		if (!path) return;
+		Utils.openFolder(path);
+	}
+
+	play(e: Event) {
+		const btn = e.currentTarget as HTMLElement;
+		const path = btn.getAttribute("data-path")!;
+		if (!path) return;
+		Utils.openFile(path);
 	}
 
 	protected onEvent() {
@@ -160,6 +199,9 @@ export default class PageCode extends UI<IProp> {
 			}
 
             <wie-line>
+             <wie-btn onclick='updateActor' index='${index}'>${
+			SVGConst.Refresh
+		} 更新信息</wie-btn>
             ${this.renderButton(
 				actor,
 				"link",
@@ -174,9 +216,7 @@ export default class PageCode extends UI<IProp> {
 				SVGConst.Search,
 				`https://missav.ai/actresses/${actor.name}?sort=views`
 			)}
-            <wie-btn onclick='updateActor' index='${index}'>${
-			SVGConst.Refresh
-		} 更新</wie-btn>
+           
             ${this.renderButton(actor, "link_m", "Msin")}
             ${this.renderButton(actor, "emby", "Emby", SVGConst.Search)}
             ${this.renderButton(actor, "twitter", "SNS")}
@@ -184,6 +224,14 @@ export default class PageCode extends UI<IProp> {
             </wie-line>
         </wie-card-info>
     </wie-card>`;
+	}
+
+	copy(event: Event) {
+		const btn = event.currentTarget as HTMLElement;
+		const text = btn.getAttribute("data-copy");
+		if (!text) return;
+		Utils.copy(text);
+		new Notice("复制成功");
 	}
 
 	async updateActor(e: Event) {
@@ -199,6 +247,10 @@ export default class PageCode extends UI<IProp> {
 		//btn
 		btn.addClass("loading");
 
+		//同步大图
+		if (!actor.cover)
+			actor.cover = await GFriends.Instance().getActor(actor.name);
+
 		const ret = await Utils.fetch(
 			UrlConst.GET_ACTOR_INFO + `?name=${actor.name}`
 		);
@@ -207,6 +259,7 @@ export default class PageCode extends UI<IProp> {
 
 		if (ret) {
 			Object.assign(actor, ret);
+
 			Utils.wrActor(actor.name, actor);
 			this.setState({});
 		}
@@ -229,13 +282,54 @@ export default class PageCode extends UI<IProp> {
 		);
 
 		if (ret) {
-			console.log("ret", ret);
 			Object.assign(data, ret);
-			Utils.wrCode(data.code, data);
-			this.setState({});
-		}
+			if (data.actors)
+				data.actors = data.actors.map((actor: IActor) => {
+					// console.log("-----sss", Utils.wrActor(actor.name), actor);
+					//优先获取本地
+					return Utils.wrActor(actor.name) ?? actor;
+				});
 
-		btn.removeClass("loading");
+			//获取字幕信息
+			if (!data.subs || data.subs.length === 0) {
+				const subs = await Utils.fetch(
+					UrlConst.GET_SUBS_INFO + `?code=${data.code}`
+				);
+				if (subs) data.subs = subs;
+			}
+
+			this.updateCodeInfo();
+		} else {
+			new Notice("获取数据失败,请重试");
+			btn.removeClass("loading");
+		}
+	}
+
+	private updateCodeInfo() {
+		const data = this.data;
+		Utils.wrCode(data.code, data);
+		//更新actor
+		this.setState({});
+	}
+
+	async updateSubs(e: Event) {
+		const data = this.data;
+		const btn = e.currentTarget as HTMLElement;
+		//如果正在加载中
+		if (btn.className.indexOf("loading") > -1) return;
+		//btn
+		btn.addClass("loading");
+
+		const subs = await Utils.fetch(
+			UrlConst.GET_SUBS_INFO + `?code=${data.code}`
+		);
+		if (subs) {
+			data.subs = subs;
+			this.updateCodeInfo();
+		} else {
+			new Notice("查询字幕失败,请重试");
+			btn.removeClass("loading");
+		}
 	}
 
 	renderComment() {
@@ -284,21 +378,60 @@ export default class PageCode extends UI<IProp> {
 	renderSubs() {
 		const { subs = [] } = this.data;
 		return `<wie-area>
-            <wie-item-title>${SVGConst.Sub}字幕</wie-item-title>
+            <wie-line class='justify-between'>
+                <wie-item-title>${SVGConst.Sub}字幕</wie-item-title>
+                <wie-btn onclick='updateSubs'>${
+					SVGConst.Refresh
+				} 重新查找字幕</wie-btn>
+            </wie-line>
             <wie-line-wrap>
             ${subs
-				.map((s) => `<wie-btn>${SVGConst.Download}${s.name}</wie-btn>`)
+				.map(
+					(s) =>
+						`<wie-btn onclick='downSub' data-url='${
+							s.href ?? s.url
+						}' class='wie-btn-max ellipsis'>${SVGConst.Download}${
+							s.name
+						}</wie-btn>`
+				)
 				.join("")}
             </wie-line-wrap>
         </wie-area>`;
 	}
 
+	private isDown: boolean = false;
+
+	async downSub(e: Event) {
+		const btn = e.currentTarget as HTMLElement;
+		const url = btn.getAttribute("data-url");
+		if (!url) return;
+
+		const path = this.props.path;
+
+		if (!path) return;
+
+		if (this.isDown) return new Notice("正在下载中，请稍后");
+
+		//下载字幕
+		let folder = this.videoFolder;
+		let name = this.videoName + ".zh-CN.default.srt";
+
+		//去除后缀
+
+		let ret = await Utils.download(url, folder, name);
+
+		if (ret) new Notice("已下载文件到目录");
+		else new Notice("下载失败");
+
+		this.isDown = false;
+	}
+
 	renderInfo() {
-		const { series } = this.data;
+		const { series, desc = "--" } = this.data;
 		const { url = "", name = "" } = series ?? {};
 		return `<wie-area>
             <wie-item-title>${SVGConst.Info}信息</wie-item-title>
-            <wie-text><w-name>剧情：</w-name> ${this.data.desc}</wie-text>
+            <wie-text><w-name>剧情：</w-name> ${desc}</wie-text>
             <wie-text><w-name>导演：</w-name> ${this.data.director}</wie-text>
             <wie-text><w-name>时长：</w-name> ${this.data.duration}</wie-text>
             <wie-text><w-name>制作：</w-name> ${this.data.studio}</wie-text>
@@ -370,7 +503,7 @@ export default class PageCode extends UI<IProp> {
                     <wie-tag-z class='${!!leak} leak'>无码破解</wie-tag-z>
                 </wie-item>
                 <wie-item>
-                    <wie-btn data-copy='${magnet}'>${
+                    <wie-btn onclick='copy' data-copy='${magnet}'>${
 			SVGConst.Copy
 		}复制链接</wie-btn>
                     <a href='${magnet}' class='wie-btn' target='_blank' referrerpolicy='same-origin'>${
@@ -411,5 +544,24 @@ export default class PageCode extends UI<IProp> {
             <w-desc>${name}：</w-desc>
             <div class='wie-actor-line'>${value}</div>
         </wie-item>`;
+	}
+
+	private get videoCover() {
+		return this.videoFolder + "/" + this.videoName + "-fanart.jpg";
+	}
+
+	private get videoFolder() {
+		const { path } = this.props;
+		return path.replace(/\\/g, "/").replace(/\/[^/]+$/, "");
+	}
+
+	private get videoName() {
+		const { path } = this.props;
+		//截取文件名
+		return path
+			.replace(/\\/g, "/")
+			.split("/")
+			.pop()!
+			.replace(/\.[^.]+$/, "");
 	}
 }

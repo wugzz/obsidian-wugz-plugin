@@ -108,7 +108,8 @@ export interface ICodeInfo {
 
 export interface ISub {
 	name: string;
-	href: string;
+	url?: string;
+	href?: string;
 }
 
 export interface IComment {

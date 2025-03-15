@@ -23,11 +23,16 @@ export default class JavVideo extends CodeBlack<IProp> {
 		//读取缓存文件
 
 		const data = this.readJson();
+		console.log("-----data", data);
 		return `
             ${this.ui(PageCode, {
-				data,
+				data: {
+					code: this.props.name,
+					...(data ?? {}),
+				},
 				cover: this.localImg(this.videoCover),
 				code: this.props.name,
+				path: this.props.path,
 			})}
         `;
 	}
@@ -41,8 +46,9 @@ export default class JavVideo extends CodeBlack<IProp> {
 
 		//处理actors
 		if (!data.actors) return data;
+
 		data.actors = data.actors.map((actor: IActor) => {
-			console.log("-----sss", Utils.wrActor(actor.name), actor);
+			// console.log("-----sss", Utils.wrActor(actor.name), actor);
 			//优先获取本地
 			return Utils.wrActor(actor.name) ?? actor;
 		});
@@ -57,11 +63,6 @@ export default class JavVideo extends CodeBlack<IProp> {
 	private get videoFolder() {
 		const { path } = this.props;
 		return path.replace(/\\/g, "/").replace(/\/[^/]+$/, "");
-	}
-
-	private get cachePath() {
-		const { path, name } = this.props;
-		return "E:\\workspace\\n8n\\.cache\\jav\\codes\\";
 	}
 
 	private get videoName() {
