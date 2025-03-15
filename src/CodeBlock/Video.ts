@@ -1,5 +1,6 @@
 import CodeBlack from "src/Base/CodeBlock";
 import * as fs from "fs";
+import { MarkdownView } from "obsidian";
 
 interface IProp {
 	name: string;
@@ -34,10 +35,8 @@ export default class Video extends CodeBlack<IProp> {
 	}
 
 	private async checkCache(video: HTMLVideoElement) {
-		const path = this.cachePath();
 		const exists = fs.existsSync(this.cachePath());
 
-		// console.log("checkCache", path, exists);
 		if (exists) this.videoEnded(video, false);
 	}
 
@@ -47,41 +46,32 @@ export default class Video extends CodeBlack<IProp> {
 		//添加本地缓存
 		if (write) fs.writeFileSync(this.cachePath(), "1");
 
-		const { updateH = true } = this.props;
+		const item = this.app.workspace.getActiveViewOfType(MarkdownView);
 
-		if (!updateH || !uH) return;
+		if (!item) return console.log("-videoEnded-", "没有找到MarkdownView");
 
-		// 查找前一个标题元素
-		let prevElem: any = video.parentElement?.parentElement;
-		while (prevElem) {
-			if (prevElem.className.match(/el-h2|el-h3|el-h4|HyperMD-header/))
+		const content = item.editor.getValue();
+
+		const { url } = this.props;
+
+		let reg = new RegExp(`${url}-已播放`, "g");
+
+		if (content.match(reg)) return;
+
+		const index = content.match(url)?.index;
+
+		if (index === undefined) return;
+
+		const count = item.editor.lineCount(); // 结束位置
+
+		for (let i = 0; i < count; i++) {
+			let text = item.editor.getLine(i);
+			if (text && text.startsWith("##") && text.match(url)) {
+				item.editor.setLine(i, text.replace(url, `${url}-已播放`));
+				item.editor.setCursor({ line: i, ch: 0 });
 				break;
-			// console.log("prevElem", prevElem, prevElem.className.matches("HyperMD-header"));
-			prevElem = prevElem.previousElementSibling;
+			}
 		}
-
-		//如果标题已经修改过，不再修改
-		// console.log("prevElem", video, prevElem);
-
-		// if (prevElem) {
-		// 	const text = prevElem?.textContent;
-		// 	if (text.match("已播放")) return;
-		// 	// prevElem = prevElem.querySelector(
-		// 	// 	"h2, h3, h4, .cm-header-2, .cm-header-3, .cm-header-4"
-		// 	// );
-		// }
-		if (!prevElem) return;
-
-		const text = prevElem?.textContent;
-		if (text.match("已播放")) return;
-
-		if (prevElem.querySelector("h2,h3,h4")) return;
-
-		prevElem
-			.querySelector(".cm-header")
-			.insertAdjacentHTML("beforeend", "-已播放");
-		//修改标题
-		// prevElem.insertAdjacentHTML("beforeend", "-已播放");
 	}
 
 	private cachePath() {

@@ -2,9 +2,9 @@ import { Plugin } from "obsidian";
 import CodeBlock from "src/Base/CodeBlock";
 import Card from "src/CodeBlock/Card";
 import ChanTitle from "src/CodeBlock/ChanTitle";
+import JavVideo from "src/CodeBlock/JavVideo";
 import Tip from "src/CodeBlock/Tip";
 import Video from "src/CodeBlock/Video";
-import WButton from "src/CodeBlock/WButton";
 import PluginSetting from "src/PluginSetting";
 
 // Remember to rename these classes and interfaces!
@@ -23,12 +23,16 @@ export default class MyPlugin extends Plugin {
 		["Video", Video],
 		["Card", Card],
 		["Tip", Tip],
+		["JavVideo", JavVideo],
 	];
 
 	settings: MyPluginSettings;
 
 	async onload() {
 		await this.loadSettings();
+
+		//注册组件
+		// WCard.register("w-card");
 
 		//初始化代码块
 		this.initCodeBlocks();

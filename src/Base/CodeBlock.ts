@@ -1,5 +1,8 @@
 import MyPlugin from "main";
 import { MarkdownPostProcessorContext, Notice } from "obsidian";
+import UI from "./UI";
+
+type GC<T = unknown> = new (...args: any[]) => T;
 
 interface IProp {
 	name: string;
@@ -13,6 +16,8 @@ export default abstract class CodeBlack<T = any> {
 	protected props: T = {} as T;
 
 	protected view: HTMLElement;
+
+	protected uis: Set<UI<any>> = new Set();
 
 	constructor(plugin: MyPlugin) {
 		this.plugin = plugin;
@@ -33,10 +38,11 @@ export default abstract class CodeBlack<T = any> {
 		this.view = el;
 
 		this.parserSource(source);
-
 		el.insertAdjacentHTML("beforeend", this.renderTemplate());
 		//绑定事件
 		this.bindEvent(el);
+		//挂载子组件
+		this.uis.forEach((ui) => ui.mount(el));
 	}
 
 	// protected getElementById(id:string) {
@@ -74,5 +80,15 @@ export default abstract class CodeBlack<T = any> {
 			this.oPlugin("obsidian-icon-folder")?.api.getIconByName(name)
 				?.svgElement ?? ""
 		);
+	}
+
+	protected ui<T extends UI>(UI: GC<T>, props: T["props"]) {
+		const ui = new UI(this.app, props);
+		this.uis.add(ui);
+		return ui.template();
+	}
+
+	protected localImg(localPath: string) {
+		return `http://localhost:5678/webhook/img?path=${localPath}`;
 	}
 }
