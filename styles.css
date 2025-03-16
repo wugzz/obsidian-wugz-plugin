@@ -133,11 +133,23 @@ If your plugin does not need CSS, delete this file.
 .w-page-code{
     color: #333;
     cursor: default;
-
+    --wie-color:#333;
+    --wie-desc:#999;
+    --wie-background:#FFF;
 }
 
 wie-bold{
     font-weight: 700;
+}
+
+.swiper-container{
+    height: 417px;
+}
+.swiper-slide img {
+    max-width: 100%;
+    margin: 0 auto;
+    height: 100%;
+    display: inherit;
 }
 
 wie-area{
@@ -148,7 +160,23 @@ wie-area{
     gap: 6px;
     color: var(--wie-color);
     background: var(--wie-background);
+    overflow: hidden;
+    position: relative;
     /* background: var(--tab-container-background); */
+}
+
+wie-area svg{
+    width: 20px;
+    height: 20px;
+}
+wie-stamp{
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+}
+wie-stamp svg{
+    width: 60px;
+    height: 60px;
 }
 
 .wie-a{
@@ -181,16 +209,24 @@ wie-card-info{
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), 50% rgba(0, 0, 0, 0));
 }
 
-wie-area svg{
-    width: 20px;
-    height: 20px;
-}
+
 
 wie-title{
     font-size: 1.5em;
     font-weight: 900;
     color: var(--wie-color);
 }
+
+.wie-green{
+    color: #4CAF50;
+    fill: currentColor;
+}
+
+.wie-red{
+    color: #F44336;
+    fill: currentColor;
+}
+
 
 wie-tag,
 wie-tag-z{

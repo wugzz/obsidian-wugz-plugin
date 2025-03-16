@@ -94,4 +94,8 @@ export default class Utils {
 	public static localImg(localPath: string) {
 		return `http://localhost:5678/webhook/img?path=${localPath}`;
 	}
+
+	public static proxyImg(url: string) {
+		return `https://wsrv.nl/?url=${url}`;
+	}
 }

@@ -32,18 +32,6 @@ export default abstract class CodeBlack<T = any> extends UI<T> {
 		super.mount(container);
 	}
 
-	protected getResourcePath(fileName: string): string | null {
-		// 获取 Obsidian 当前 Vault 中的所有文件
-		const files = this.app.vault.getFiles();
-		// 遍历所有文件，查找匹配的文件名
-		for (const file of files) {
-			if (file.name === fileName) {
-				return this.app.vault.adapter.getResourcePath(file.path); // 返回文件的完整路径
-			}
-		}
-		return null; // 如果未找到匹配的文件，返回 null
-	}
-
 	protected oPlugin(name: string) {
 		const plugins = (this.app as any).plugins.plugins;
 		return plugins[name];

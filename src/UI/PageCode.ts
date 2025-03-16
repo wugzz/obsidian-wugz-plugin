@@ -20,7 +20,7 @@ import { ImageModal } from "src/Modal/ImageModal";
 
 interface IProp {
 	data: ICodeInfo;
-	file: IFile;
+	file?: IFile;
 }
 
 export interface IFile {
@@ -37,43 +37,87 @@ export interface IFile {
 }
 
 export default class PageCode extends UI<IProp> {
-	private get data() {
-		return this.props.data;
+	private _data?: ICodeInfo;
+
+	private get data(): ICodeInfo {
+		if (!this._data) {
+			this._data = this.props.data;
+			this._data = this.readJson() ?? this._data;
+		}
+		return this._data!;
 	}
 
 	private get cover() {
 		//检查是否有本地封面
+
 		let folder = this.videoFolder;
 		let name = folder + "/" + this.videoName + "-fanart.jpg";
-		if (fs.existsSync(name)) return Utils.localImg(name);
+		if (this.videoPath && fs.existsSync(name)) return Utils.localImg(name);
 		name = folder + "/fanart.jpg";
-		if (fs.existsSync(name)) return Utils.localImg(name);
-		return this.data.cover;
+		if (this.videoPath && fs.existsSync(name)) return Utils.localImg(name);
+
+		//判断如果不是以//,http,https开头的
+		const { cover } = this.data;
+		if (cover && !cover.startsWith("//") && !cover.startsWith("http")) {
+			return this.getResourcePath(cover) ?? cover;
+		}
+		//判读是否为
+		return cover && Utils.proxyImg(cover!);
+	}
+
+	private readJson() {
+		const { code } = this.data;
+
+		const data = Utils.wrCode(code);
+		//处理
+		if (!data) return data ?? this.data;
+
+		//处理actors
+		if (!data.actors) return data;
+
+		data.actors = data.actors.map((actor: IActor) => {
+			// console.log("-----sss", Utils.wrActor(actor.name), actor);
+			//优先获取本地
+			return Utils.wrActor(actor.name) ?? actor;
+		});
+
+		return data;
 	}
 
 	render() {
-		const { data } = this.props;
+		const data = this.data;
 
 		console.log("render data", data);
 
-		if (!data.title)
-			return `
-        <img src="${this.cover}" alt=""  class='w-br'/>
-        <wie-area class='items-center'>
-            <div>没有找到JSON数据</div>
-            <w-desc>${this.videoPath}</w-desc>
-            <wie-line>
-                <wie-btn onclick='updateCode'>${SVGConst.Refresh}更新番号信息</wie-btn>
-                <wie-btn onclick='open' data-path='${this.videoFolder}'>${SVGConst.Copy}打开视频目录</wie-btn>
-                <a href='https://javdb.com/search?q=${data.code}&f=all' class='wie-btn' target="_blank" >${SVGConst.Code} 跳转到JavDB进行查询</a>
-            </wie-line>
-        </wie-area>`;
+		// if (!data.title)
+		// 	return `
+		// <img src="${this.cover}" alt=""  class='w-br'/>
+		// ${this.renderPreview()}
+		// <wie-area class='items-center'>
+		//     <div>没有找到JSON数据</div>
+		//     <w-desc>${this.videoPath}</w-desc>
+		//     <wie-line>
+		//         <wie-btn onclick='updateCode'>${
+		// 			SVGConst.Refresh
+		// 		}更新番号信息</wie-btn>
+		//         <wie-btn onclick='open' data-path='${this.videoFolder}'>${
+		// 		SVGConst.Copy
+		// 	}打开视频目录</wie-btn>
+		//         <a href='https://javdb.com/search?q=${
+		// 			data.code
+		// 		}&f=all' class='wie-btn' target="_blank" >${
+		// 		SVGConst.Code
+		// 	} 跳转到JavDB进行查询</a>
+		//     </wie-line>
+		// </wie-area>`;
 
 		return `
         <div class='flex flex-column gap w-page-code'>
             <img src="${this.cover}" alt=""  class='w-br'/>
             <wie-area>
-                <wie-title>${data.title}</wie-title>
+                <wie-title>${
+					data.title ?? this.videoName ?? data.code
+				}</wie-title>
                 <wie-line-wrap>
                     <wie-tag onclick='copy' data-copy='${data.code}'>${
 			data.code
@@ -82,9 +126,11 @@ export default class PageCode extends UI<IProp> {
                     ${data.leak ? `<wie-tag>英字</wie-tag>` : ""}
                     ${data.und ? `<wie-tag>4K</wie-tag>` : ""}
                     ${this.renderScore("JavDB", data.score)}
-                    <wie-item>${SVGConst.Publish} ${data.releaseDate}</wie-item>
+                    <wie-item>${SVGConst.Publish} ${
+			data.releaseDate ?? "??"
+		}</wie-item>
                 </wie-line-wrap>
-                <w-desc>${this.videoPath}</w-desc>
+                ${this.videoPath ? `<w-desc>${this.videoPath}</w-desc>` : ``}
                 <wie-line-wrap>
                 ${this.renderButton(
 					data as any,
@@ -98,9 +144,11 @@ export default class PageCode extends UI<IProp> {
                 <wie-btn onclick='open' data-path='${this.videoFolder}'>${
 			SVGConst.Copy
 		}打开视频目录</wie-btn>
-        <wie-btn onclick='play' data-path='${this.videoPath}'>${
-			SVGConst.Play
-		}播放视频</wie-btn>
+        ${
+			this.videoPath
+				? `<wie-btn onclick='play' data-path='${this.videoPath}'>${SVGConst.Play}播放视频</wie-btn>`
+				: ""
+		}
         <wie-btn onclick='donwloadImages' >${SVGConst.Refresh}同步图片</wie-btn>
                 </wie-line-wrap>
                 ${this.renderEmbyTag(data)}
@@ -120,6 +168,7 @@ export default class PageCode extends UI<IProp> {
 
 	async donwloadImages(e: Event) {
 		const btn = e.currentTarget as HTMLElement;
+		if (!this.videoPath) return new Notice("没有找到视频路径");
 		//如果正在加载中
 		if (btn.className.indexOf("loading") > -1) return;
 
@@ -140,19 +189,19 @@ export default class PageCode extends UI<IProp> {
 		}
 		//处理封面图
 		let { image, cover } = this.data;
-		if (cover) {
+		if (cover && this.videoPath) {
 			let item = await Utils.download(
 				cover,
-				this.videoFolder,
+				this.videoFolder!,
 				this.videoName + "-fanart.jpg"
 			);
 			if (!item) fail++;
 		}
 		//处理大图
-		if (image) {
+		if (image && this.videoPath) {
 			let item = await Utils.download(
 				image,
-				this.videoFolder,
+				this.videoFolder!,
 				"image.jpg"
 			);
 			if (!item) fail++;
@@ -244,7 +293,13 @@ export default class PageCode extends UI<IProp> {
 			});
 		} catch (error) {}
 
-		if (previews.length === 0) return "";
+		if (previews.length === 0) {
+			//判断
+			const { preview = [] } = this.data;
+			if (preview.length > 0) {
+				previews = preview.map((item) => Utils.proxyImg(item)!);
+			} else return "";
+		}
 
 		return `<wie-area >
         <wie-line class='justify-between'>
@@ -588,12 +643,12 @@ export default class PageCode extends UI<IProp> {
 
 		const path = this.videoPath;
 
-		if (!path) return;
+		if (!path) return new Notice("没有找到视频路径");
 
 		if (this.isDown) return new Notice("正在下载中，请稍后");
 
 		//下载字幕
-		let folder = this.videoFolder;
+		let folder = this.videoFolder!;
 		let name = this.videoName + ".zh-CN.default.srt";
 
 		//去除后缀
@@ -607,14 +662,20 @@ export default class PageCode extends UI<IProp> {
 	}
 
 	renderInfo() {
-		const { series, desc = "--" } = this.data;
+		const {
+			series,
+			desc = "--",
+			director = "",
+			duration = "--",
+			studio = "--",
+		} = this.data;
 		const { url = "", name = "" } = series ?? {};
 		return `<wie-area>
             <wie-item-title>${SVGConst.Info}信息</wie-item-title>
             <wie-text><w-name>剧情：</w-name> ${desc}</wie-text>
-            <wie-text><w-name>导演：</w-name> ${this.data.director}</wie-text>
-            <wie-text><w-name>时长：</w-name> ${this.data.duration}</wie-text>
-            <wie-text><w-name>制作：</w-name> ${this.data.studio}</wie-text>
+            <wie-text><w-name>导演：</w-name> ${director}</wie-text>
+            <wie-text><w-name>时长：</w-name> ${duration}</wie-text>
+            <wie-text><w-name>制作：</w-name> ${studio}</wie-text>
             <wie-text><w-name>系列：</w-name> <a target="_blank" class="wie-a" href='${url}'>${name}</a></wie-text>
         </wie-area>`;
 	}
@@ -622,9 +683,11 @@ export default class PageCode extends UI<IProp> {
 	renderTags() {
 		return `<wie-area>
             <wie-item-title>${SVGConst.TAG}标签</wie-item-title>
-            <wie-line-wrap>${this.data.tags
-				?.map((g) => `<wie-tag>${g}</wie-tag>`)
-				.join(" ")}</wie-line-wrap>
+            <wie-line-wrap>${
+				this.data.tags
+					?.map((g) => `<wie-tag>${g}</wie-tag>`)
+					.join(" ") || ""
+			}</wie-line-wrap>
         </wie-area>`;
 	}
 
@@ -645,7 +708,7 @@ export default class PageCode extends UI<IProp> {
 	}
 
 	renderScore(title: string, score?: IScore) {
-		if (!score) return;
+		if (!score) return "";
 		let html = `<wie-item class='gap-0'>${SVGConst.Score}<span>${
 			score.score
 		}</span><span>|${title}${
@@ -731,19 +794,19 @@ export default class PageCode extends UI<IProp> {
 	}
 
 	private get videoFolder() {
-		return this.videoPath.replace(/\\/g, "/").replace(/\/[^/]+$/, "");
+		return this.videoPath?.replace(/\\/g, "/").replace(/\/[^/]+$/, "");
 	}
 
 	private get videoName() {
 		//截取文件名
 		return this.videoPath
-			.replace(/\\/g, "/")
+			?.replace(/\\/g, "/")
 			.split("/")
 			.pop()!
 			.replace(/\.[^.]+$/, "");
 	}
 
 	private get videoPath() {
-		return this.props.file.path;
+		return this.props.file?.path;
 	}
 }
