@@ -1,23 +1,31 @@
 import CodeBlack from "src/Base/CodeBlock";
+import SVGConst from "src/UI/SVGConst";
 
 interface IProp {
 	tid?: string;
 	count?: string;
 	day?: string;
+	update?: string;
 }
 
 export default class ChanTitle extends CodeBlack<IProp> {
 	renderTemplate(): string {
-		const { tid = "未知", count = 0 } = this.props;
-		return `<div class='flex b-bottom b-top p-y gap-10 align-center' >
-<div class='w-item'><div>帖子ID:</div><div id='4chan-tid'>${tid}</div></div>
-<div class='w-item'><div>图片数量:</div><div class='4chan-images'>${count}</div></div>
-<div class='w-item'><button style='display:none'></button></div>`;
+		const { tid = "未知", count = 0, day, update } = this.props;
+		return `<wie-area><wie-line style='gap:20px'>
+<wie-item><w-name>ID:</w-name><wie-bold>${tid}</wie-bold></wie-item>
+<wie-item><w-name>图片:</w-name><wie-bold>${count}</wie-bold></wie-item>
+<wie-item><w-name>更新:</w-name><wie-bold>${
+			update ?? "--"
+		}</wie-bold></wie-item>
+<wie-item><w-name>原帖:</w-name><a class='wie-btn' target='_blank' href='https://boards.4chan.org/gif/thread/${tid}?day=${day}&count=${count}'>${
+			SVGConst.Detail
+		}地址</a></wie-item>
+<wie-item><wie-btn style='display:none'></wie-btn></wie-item></wie-line></wie-area>`;
 	}
 
 	protected bindEvent(el: HTMLElement) {
 		this.checkUpdate();
-		el.querySelector("button")?.addEventListener(
+		el.querySelector("wie-btn")?.addEventListener(
 			"click",
 			this.goUpdate.bind(this)
 		);
@@ -25,27 +33,25 @@ export default class ChanTitle extends CodeBlack<IProp> {
 
 	private isUpdate: boolean = false;
 
-	async goUpdate() {
+	async goUpdate(e: Event) {
 		const { tid = "", day } = this.props;
 		if (!tid) return;
 
 		if (this.isUpdate) return;
+
+		const btn = e.currentTarget as HTMLElement;
 		this.isUpdate = true;
-		let key = "(更新中)";
-		const btn = this.view.querySelector("button")!;
-		btn.textContent = btn.textContent + key;
+		btn.addClass("loading");
 		try {
 			const url = `http://localhost:5678/webhook/down4ChanDetail?thread=${tid}&day=${day}`;
-			await fetch(url);
+			let ret = await fetch(url);
 			//等待3秒
-			await new Promise((resolve) => setTimeout(resolve, 3000));
-
 			//修改
-			btn.style.display = "none";
+			if (ret.status == 200) btn.style.display = "none";
 		} catch (e) {
 			console.log(e);
-			btn.textContent = btn.textContent.replace(key, "");
 		}
+		btn.removeClass("loading");
 		this.isUpdate = false;
 	}
 
@@ -58,20 +64,19 @@ export default class ChanTitle extends CodeBlack<IProp> {
 
 		//请求
 		try {
-			console.log("--4Chan-检查帖子--", tid);
+			// console.log("--4Chan-检查帖子--", tid);
 			let res = await fetch(
 				`http://localhost:5678/webhook/getChatTheadInfo?t=${tid}`
 			);
 			const data = await res.json();
-			console.log("--4Chan-检查帖子--", data);
 			//如果大于当前值，则代表有更新
 			if (data.posts > Number(count)) {
-				const btn = this.view.querySelector("button")!;
-				btn.textContent = `新图片:${data.posts}`;
-				btn.style.display = "block";
+				const btn = this.view.querySelector("wie-btn") as HTMLElement;
+				btn.innerHTML = `${SVGConst.Refresh} 有更新：${data.posts}`;
+				btn.style.display = "flex";
 			}
 		} catch (error) {
-			console.log("-4Chan-检查帖子-", error);
+			// console.log("-4Chan-检查帖子-", error);
 		}
 	}
 }

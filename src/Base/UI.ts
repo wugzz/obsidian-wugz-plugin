@@ -1,18 +1,18 @@
 import { App } from "obsidian";
 
-interface IProps {
-	[key: string]: any;
-}
+type GC<T = unknown> = new (...args: any[]) => T;
 
 export default abstract class UI<T = any, S = any> {
-	protected $el: HTMLElement | null;
+	protected view: HTMLElement | null;
 
 	protected state: S = {} as any;
 
 	private id: string;
 
-	constructor(private app: App, readonly props: T = {} as any) {
-		this.$el = null;
+	protected uis: Set<UI<any>> = new Set();
+
+	constructor(protected app: App, readonly props: T = {} as any) {
+		this.view = null;
 		this.id = "w" + Math.random().toString(36).substring(7);
 	}
 
@@ -22,8 +22,8 @@ export default abstract class UI<T = any, S = any> {
 	}
 
 	mount(container: HTMLElement) {
-		this.$el = container.querySelector(`#${this.id}`)!;
-		this.$el.innerHTML = this.render();
+		this.view = container.querySelector(`#${this.id}`)!;
+		this.view.innerHTML = this.render();
 		this.bindEvents();
 		this.mountChildren();
 		this.onMount();
@@ -38,34 +38,39 @@ export default abstract class UI<T = any, S = any> {
 	}
 
 	unmount() {
-		if (this.$el) {
-			this.$el.remove();
-			this.$el = null;
+		if (this.view) {
+			this.view.remove();
+			this.view = null;
 		}
 	}
 
 	private update() {
-		if (this.$el) {
-			this.$el.innerHTML = this.render();
+		if (this.view) {
+			this.view.innerHTML = this.render();
 			this.bindEvents();
 			this.mountChildren();
 		}
 	}
 
 	private bindEvents() {
-		if (!this.$el) return;
-		this.$el.querySelectorAll("[onclick]").forEach((el: HTMLDivElement) => {
-			const methodName = el.getAttribute("onclick");
-			if (methodName && typeof (this as any)[methodName] === "function") {
-				el.onclick = (this as any)[methodName].bind(this);
-			}
-		});
-		this.onEvent(this.$el);
+		if (!this.view) return;
+		this.view
+			.querySelectorAll("[onclick]")
+			.forEach((el: HTMLDivElement) => {
+				const methodName = el.getAttribute("onclick");
+				if (
+					methodName &&
+					typeof (this as any)[methodName] === "function"
+				) {
+					el.onclick = (this as any)[methodName].bind(this);
+				}
+			});
+		this.onEvent(this.view);
 	}
 
 	private mountChildren() {
-		if (!this.$el) return;
-		this.$el.querySelectorAll("[data-component]").forEach((el) => {
+		if (!this.view) return;
+		this.view.querySelectorAll("[data-component]").forEach((el) => {
 			const componentName = el.getAttribute("data-component");
 			if (componentName && (this as any)[componentName] instanceof UI) {
 				(this as any)[componentName].mount(el);
@@ -74,4 +79,10 @@ export default abstract class UI<T = any, S = any> {
 	}
 
 	abstract render(): string;
+
+	protected ui<T extends UI>(UI: GC<T>, props: T["props"]) {
+		const ui = new UI(this.app, props);
+		this.uis.add(ui);
+		return ui.template();
+	}
 }

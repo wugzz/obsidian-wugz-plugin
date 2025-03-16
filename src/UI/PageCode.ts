@@ -16,12 +16,24 @@ import UrlConst from "src/utils/UrlConst";
 import * as fs from "fs";
 import GFriends from "src/utils/GFriends";
 import { Notice } from "obsidian";
+import { ImageModal } from "src/Modal/ImageModal";
 
 interface IProp {
 	data: ICodeInfo;
-	cover?: string;
-	code: string;
+	file: IFile;
+}
+
+export interface IFile {
+	/** 名称 */
+	name: string;
+	/** 文件路径 */
 	path: string;
+	/** 文件大小 */
+	size: string;
+	ctime: number;
+	mtime: string;
+	atime: string;
+	cache: string;
 }
 
 export default class PageCode extends UI<IProp> {
@@ -29,25 +41,37 @@ export default class PageCode extends UI<IProp> {
 		return this.props.data;
 	}
 
+	private get cover() {
+		//检查是否有本地封面
+		let folder = this.videoFolder;
+		let name = folder + "/" + this.videoName + "-fanart.jpg";
+		if (fs.existsSync(name)) return Utils.localImg(name);
+		name = folder + "/fanart.jpg";
+		if (fs.existsSync(name)) return Utils.localImg(name);
+		return this.data.cover;
+	}
+
 	render() {
-		const { data, cover, code } = this.props;
+		const { data } = this.props;
 
 		console.log("render data", data);
 
 		if (!data.title)
 			return `
-        <img src="${cover}" alt=""  class='w-br'/>
+        <img src="${this.cover}" alt=""  class='w-br'/>
         <wie-area class='items-center'>
             <div>没有找到JSON数据</div>
+            <w-desc>${this.videoPath}</w-desc>
             <wie-line>
                 <wie-btn onclick='updateCode'>${SVGConst.Refresh}更新番号信息</wie-btn>
-                <a href='https://javdb.com/search?q=${code}&f=all' class='wie-btn' target="_blank" >${SVGConst.Code} 跳转到JavDB进行查询</a>
+                <wie-btn onclick='open' data-path='${this.videoFolder}'>${SVGConst.Copy}打开视频目录</wie-btn>
+                <a href='https://javdb.com/search?q=${data.code}&f=all' class='wie-btn' target="_blank" >${SVGConst.Code} 跳转到JavDB进行查询</a>
             </wie-line>
         </wie-area>`;
 
 		return `
         <div class='flex flex-column gap w-page-code'>
-            <img src="${cover ?? data.cover}" alt=""  class='w-br'/>
+            <img src="${this.cover}" alt=""  class='w-br'/>
             <wie-area>
                 <wie-title>${data.title}</wie-title>
                 <wie-line-wrap>
@@ -59,8 +83,8 @@ export default class PageCode extends UI<IProp> {
                     ${data.und ? `<wie-tag>4K</wie-tag>` : ""}
                     ${this.renderScore("JavDB", data.score)}
                     <wie-item>${SVGConst.Publish} ${data.releaseDate}</wie-item>
-                    
                 </wie-line-wrap>
+                <w-desc>${this.videoPath}</w-desc>
                 <wie-line-wrap>
                 ${this.renderButton(
 					data as any,
@@ -74,9 +98,10 @@ export default class PageCode extends UI<IProp> {
                 <wie-btn onclick='open' data-path='${this.videoFolder}'>${
 			SVGConst.Copy
 		}打开视频目录</wie-btn>
-        <wie-btn onclick='play' data-path='${this.props.path}'>${
+        <wie-btn onclick='play' data-path='${this.videoPath}'>${
 			SVGConst.Play
 		}播放视频</wie-btn>
+        <wie-btn onclick='donwloadImages' >${SVGConst.Refresh}同步图片</wie-btn>
                 </wie-line-wrap>
                 ${this.renderEmbyTag(data)}
             </wie-area>
@@ -86,10 +111,60 @@ export default class PageCode extends UI<IProp> {
             ${this.renderTags()}
             ${this.renderSubs()}
             ${this.renderInfo()}
+            ${this.renderPreview()}
             ${this.renderComment()}
             ${this.renderMangets()}
         </div>
         `;
+	}
+
+	async donwloadImages(e: Event) {
+		const btn = e.currentTarget as HTMLElement;
+		//如果正在加载中
+		if (btn.className.indexOf("loading") > -1) return;
+
+		btn.addClass("loading");
+
+		const { preview = [] } = this.data;
+
+		let fail: number = 0;
+		for (let i = 0; i < preview.length; i++) {
+			const url = preview[i];
+			const path = this.videoFolder + "/extrafanart";
+			let item = await Utils.download(
+				url,
+				path,
+				"extrafanart-" + (i + 1) + ".jpg"
+			);
+			if (!item) fail++;
+		}
+		//处理封面图
+		let { image, cover } = this.data;
+		if (cover) {
+			let item = await Utils.download(
+				cover,
+				this.videoFolder,
+				this.videoName + "-fanart.jpg"
+			);
+			if (!item) fail++;
+		}
+		//处理大图
+		if (image) {
+			let item = await Utils.download(
+				image,
+				this.videoFolder,
+				"image.jpg"
+			);
+			if (!item) fail++;
+		}
+		if (fail > 0) {
+			new Notice("下载失败" + fail + "个，请重试");
+			btn.removeClass("loading");
+			return;
+		}
+
+		this.setState({});
+		new Notice("下载完成");
 	}
 
 	open(e: Event) {
@@ -110,17 +185,89 @@ export default class PageCode extends UI<IProp> {
 		if (!this.data) return;
 		const { actors = [] } = this.data;
 
-		if (actors.length <= 0) return;
-		new Swiper(this.$el!.querySelector("#wie-actors") as HTMLElement, {
-			spaceBetween: 10,
-			slidesPerView: "auto",
-			// watchSlidesProgress: true,
-			pagination: {
-				el: ".swiper-pagination",
-			},
-			centeredSlides: true,
-			slideToClickedSlide: true,
-		});
+		const act = this.view!.querySelector("#wie-actors") as HTMLElement;
+		if (actors.length > 1 && act) {
+			new Swiper(act, {
+				spaceBetween: 10,
+				slidesPerView: "auto",
+				// watchSlidesProgress: true,
+				pagination: {
+					el: ".swiper-pagination",
+				},
+				centeredSlides: true,
+				slideToClickedSlide: true,
+			});
+		}
+
+		const pre = this.view!.querySelector("#wie-previews") as HTMLElement;
+
+		console.log("pre", pre);
+		if (pre) {
+			new Swiper(
+				this.view!.querySelector("#wie-previews") as HTMLElement,
+				{
+					spaceBetween: 10,
+					slidesPerView: "auto",
+					// watchSlidesProgress: true,
+					pagination: {
+						enabled: true,
+						type: "fraction",
+					},
+					centeredSlides: true,
+					slideToClickedSlide: true,
+				}
+			);
+		}
+	}
+
+	openImage(e: Event) {
+		let image = this.data.image;
+		if (!image) return;
+		if (fs.existsSync(this.videoFolder + "/image.jpg")) {
+			image = Utils.localImg(this.videoFolder + "/image.jpg");
+		}
+		new ImageModal(this.app, { image }).open();
+	}
+
+	renderPreview() {
+		let folder = this.videoFolder;
+
+		let previews: string[] = [];
+
+		//判断是否有图片
+		try {
+			folder = folder + "/extrafanart";
+			const list = fs.readdirSync(folder);
+
+			list.forEach((item) => {
+				const path = folder + "/" + item;
+				previews.push(Utils.localImg(path));
+			});
+		} catch (error) {}
+
+		if (previews.length === 0) return "";
+
+		return `<wie-area >
+        <wie-line class='justify-between'>
+        <wie-item-title>${SVGConst.Info}预览图</wie-item-title>
+
+        ${
+			this.data.image
+				? `<wie-btn onclick='openImage'>${SVGConst.Delete}查看大图</wie-btn>`
+				: ""
+		}
+        </wie-line>
+        <div id='wie-previews' class='swiper-container'>
+        <div class='swiper-wrapper'>
+		    ${previews
+				.map(
+					(p) =>
+						`<div class='swiper-slide'><img src='${p}' class='w-br'/></div>`
+				)
+				.join("")}
+                </div>
+		    <div class="swiper-pagination"></div></div>
+		</wie-area>`;
 	}
 
 	renderActors() {
@@ -144,15 +291,32 @@ export default class PageCode extends UI<IProp> {
         </div>`;
 	}
 
+	private actorImage(actor: IActor, type: "avatar" | "cover") {
+		return actor[type];
+		//判断本地有没有
+		let local = UrlConst.CACHE_ACTORS_PATH + `${actor.name}-${type}.jpg`;
+		local = local.replace(/\\/g, "/");
+		if (fs.existsSync(local)) return Utils.localImg(local);
+		return actor[type];
+	}
+
 	public renderActor(actor: IActor, index: number = 0) {
 		//是否收藏
 
 		return `<wie-card>
-        <img src='${actor.cover}' class='wie-img-mask'></img>
+        <img src='${this.actorImage(
+			actor,
+			"cover"
+		)}' class='wie-img-mask'></img>
         <wie-card-info>
-            <wie-avatar><img src='${actor.avatar}'/></wie-avatar>
-            <div class='name'>${actor.name}</div>
-            <div class='wie-actor-line left'>
+            <wie-avatar><img src='${this.actorImage(
+				actor,
+				"avatar"
+			)}'/></wie-avatar>
+            <wie-item-title style='font-size:20px;'>${
+				actor.name
+			}</wie-item-title>
+            <wie-line>
                 ${
 					actor.birthday
 						? `<span>${actor.birthday} ${
@@ -160,13 +324,12 @@ export default class PageCode extends UI<IProp> {
 						  }</span>`
 						: ""
 				}
-                ${actor.height ? `<span>${actor.height}cm</span>` : "--"}
-                <span>${actor.blood ?? ""}</span>
-            </div>
+                ${actor.height ? `<span>${actor.height}cm</span>` : ""}
+                ${actor.blood ? `<span>${actor.blood}</span>` : ""}
+                ${actor.cup ? `<span>${actor.cup}罩杯</span>` : ""}
+            </wie-line>
 
-            <div class='wie-actor-line left'><wie-sname>罩杯：</wie-sname><span >${Actor.renderCup(
-				actor.cup
-			)}</span></div>
+                
              <div class='flex justify-between item-center'>
                 ${this.renderLine("样貌", actor.rating?.looks)}
                 ${this.renderLine("身材", actor.rating?.body)}
@@ -179,18 +342,18 @@ export default class PageCode extends UI<IProp> {
                 ${this.renderItem(actor, "hip", "臀围")}
                 ${this.renderItem(actor, "waist", "腰围")}
                ${this.renderItem(actor, "birthplace", "出身地")}
-                ${this.renderItem(actor, "tags", "标签")}
+               ${this.renderItem(actor, "debut_period", "生涯")}
             </div>
             ${
 				actor.alias && actor.alias.length > 0
-					? `<div class='wie-actor-line item-start'><wie-sname>别名：</wie-sname><span >${actor.alias.map(
+					? `<wie-line><w-name>别名：</w-name><span >${actor.alias.map(
 							(item) => item.split(" ")[0]
-					  )}</span></div>`
+					  )}</span></wie-line>`
 					: ""
 			}
             <div class='flex gap flex-wrap item-center'>
                 ${this.renderItem(actor, "hobby", "爱好")}
-                ${this.renderItem(actor, "debut_period", "生涯")}
+                  ${this.renderItem(actor, "tags", "标签")}
             </div>
             ${
 				actor.first
@@ -198,8 +361,8 @@ export default class PageCode extends UI<IProp> {
 					: ""
 			}
 
-            <wie-line>
-             <wie-btn onclick='updateActor' index='${index}'>${
+            <wie-line style='margin-top:5px;'>
+            <wie-btn onclick='updateActor' index='${index}'>${
 			SVGConst.Refresh
 		} 更新信息</wie-btn>
             ${this.renderButton(
@@ -261,14 +424,32 @@ export default class PageCode extends UI<IProp> {
 			Object.assign(actor, ret);
 
 			Utils.wrActor(actor.name, actor);
+
+			// //同步下载视频图片
+			// if (actor.cover) {
+			// 	await Utils.download(
+			// 		actor.cover,
+			// 		`${UrlConst.CACHE_ACTORS_PATH}`,
+			// 		`${actor.name}-cover.jpg`
+			// 	);
+			// }
+			// //同步小图
+			// if (actor.avatar) {
+			// 	await Utils.download(
+			// 		actor.avatar,
+			// 		`${UrlConst.CACHE_ACTORS_PATH}`,
+			// 		`${actor.name}-avatar.jpg`
+			// 	);
+			// }
+
 			this.setState({});
 		}
 	}
 
 	async updateCode(e: Event) {
-		const data = this.data ?? {};
+		const data = this.data;
 
-		if (!data.code) data.code = this.props.code;
+		if (!data.code) return;
 
 		const btn = e.currentTarget as HTMLElement;
 		//如果正在加载中
@@ -406,7 +587,7 @@ export default class PageCode extends UI<IProp> {
 		const url = btn.getAttribute("data-url");
 		if (!url) return;
 
-		const path = this.props.path;
+		const path = this.videoPath;
 
 		if (!path) return;
 
@@ -551,17 +732,19 @@ export default class PageCode extends UI<IProp> {
 	}
 
 	private get videoFolder() {
-		const { path } = this.props;
-		return path.replace(/\\/g, "/").replace(/\/[^/]+$/, "");
+		return this.videoPath.replace(/\\/g, "/").replace(/\/[^/]+$/, "");
 	}
 
 	private get videoName() {
-		const { path } = this.props;
 		//截取文件名
-		return path
+		return this.videoPath
 			.replace(/\\/g, "/")
 			.split("/")
 			.pop()!
 			.replace(/\.[^.]+$/, "");
+	}
+
+	private get videoPath() {
+		return this.props.file.path;
 	}
 }

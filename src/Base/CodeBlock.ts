@@ -29,8 +29,8 @@ export default abstract class CodeBlack<T = any> {
 		//解析source
 		const lines = source.split("\n");
 		for (let line of lines) {
-			const [name, type] = line.split(" ");
-			(this.props as any)[name] = type;
+			const [name, ...other] = line.split(" ");
+			(this.props as any)[name] = other.join(" ");
 		}
 	}
 
@@ -88,7 +88,7 @@ export default abstract class CodeBlack<T = any> {
 		return ui.template();
 	}
 
-	protected localImg(localPath: string) {
-		return `http://localhost:5678/webhook/img?path=${localPath}`;
-	}
+	// protected localImg(localPath: string) {
+	// 	return `http://localhost:5678/webhook/img?path=${localPath}`;
+	// }
 }

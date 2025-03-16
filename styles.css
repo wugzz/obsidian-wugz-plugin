@@ -8,9 +8,10 @@ If your plugin does not need CSS, delete this file.
 */
 
 .w-video{
-    border-radius: 6px;
+    border-radius: 10px;
     cursor: pointer;
     width: 100%;
+
 }
 
 .w-video-read{
@@ -135,6 +136,10 @@ If your plugin does not need CSS, delete this file.
 
 }
 
+wie-bold{
+    font-weight: 700;
+}
+
 wie-area{
     display: flex;
     flex-direction: column;
@@ -237,6 +242,11 @@ wie-line-wrap{
 }
 w-desc{
     color: var(--wie-desc);
+}
+w-desc.active{
+    color: var(--wie-color);
+    font-weight: 700;
+    font-size: 1.1em;
 }
 
 wie-comment{

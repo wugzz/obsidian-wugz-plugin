@@ -90,4 +90,8 @@ export default class Utils {
 		path = path.replace(/\//g, "\\");
 		exec(`start "" "${path}"`);
 	}
+
+	public static localImg(localPath: string) {
+		return `http://localhost:5678/webhook/img?path=${localPath}`;
+	}
 }

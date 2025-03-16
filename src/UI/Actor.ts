@@ -38,9 +38,9 @@ export default class Actor {
 		];
 		return cups
 			.map((c) => {
-				return `<span class='cup ${
+				return `<w-desc class='${
 					c === cup ? "active" : ""
-				}'>${c}</span>`;
+				}'>${c}</w-desc>`;
 			})
 			.join("");
 	}
