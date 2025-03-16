@@ -4,6 +4,8 @@
 // import CodeFind from "../CodeFind";
 // import Setting from "../Setting";
 
+import { IFile } from "./PageCode";
+
 export enum QTType {
 	/** 不存在 */
 	NULL = "null",
@@ -104,6 +106,8 @@ export interface ICodeInfo {
 	finish?: boolean;
 
 	finishSyncs?: string[];
+
+	files?: IFile[];
 }
 
 export interface ISub {

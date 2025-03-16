@@ -122,7 +122,11 @@ If your plugin does not need CSS, delete this file.
     overflow: hidden;
 }
 
-
+wie-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
 
 .view-content{
     --wie-color:#333;
@@ -136,6 +140,15 @@ If your plugin does not need CSS, delete this file.
     --wie-color:#333;
     --wie-desc:#999;
     --wie-background:#FFF;
+}
+
+.wie-full{
+    contain: paint !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
 }
 
 wie-bold{

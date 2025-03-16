@@ -1,37 +1,224 @@
 import CodeBlack from "src/Base/CodeBlock";
-import PageCode, { IFile } from "src/UI/PageCode";
-import Utils from "src/utils/Utils";
-import { IActor } from "src/UI/ICodeInfo";
-import { normalizePath } from "obsidian";
 
-export default class JavDashboard extends CodeBlack<IFile> {
+import { normalizePath, Notice } from "obsidian";
+import SVGConst from "src/UI/SVGConst";
+import Utils from "src/utils/Utils";
+import UrlConst from "src/utils/UrlConst";
+import { IFile } from "src/UI/PageCode";
+import { ICodeInfo, IScore } from "src/UI/ICodeInfo";
+import * as fs from "fs";
+import { JavModal } from "src/Modal/JavModal";
+
+interface IProps {
+	/** 路径 */
+	path: string;
+	/** 标题 */
+	name: string;
+	/** 封面 */
+	cover: string;
+}
+
+/** 缓存列表 */
+type IDataCahe = { [key: string]: ICodeInfo };
+
+export default class JavDashboard extends CodeBlack<IProps> {
+	private _init: boolean = false;
+
+	private dataCache: IDataCahe = {};
+
+	mount(container: HTMLElement): void {
+		super.mount(container);
+
+		console.log("--container-", container);
+		container.parentElement!.addClass("wie-full");
+	}
+
 	render(): string {
+		//初始化
+		this.init();
 		//读取缓存文件
 		// this.getFile("Videos");
+
+		const { name, cover, path } = this.props;
+		const { list = [] } = this.state;
+		console.log("---start---", list, this.state);
+
 		return `
-            <wie-area>
-                
+            <wie-area style='margin-bottom:20px'>
+                <wie-line class='justify-between'>
+                    <wie-title class='ellipsis-2'>${name}</wie-title>
+                    <wie-btn onclick='scan'>${
+						SVGConst.Refresh
+					} 重新检索资源</wie-btn>
+                </wie-line>
+            </wie-area>
+
+            <wie-grid>
+                ${list
+					.map((item: ICodeInfo, index: number) =>
+						this.renderVideo(item, index)
+					)
+					.join("")}
+            </wie-grid>
+        `;
+	}
+
+	private renderVideo(item: ICodeInfo, index: number) {
+		return `
+            <wie-area style='padding:0;cursor:pointer;' code=${
+				item.code
+			} onclick='open' >
+                ${
+					item.cover
+						? `<img src="${item.cover}" />`
+						: `<div style='padding-bottom:67%'></div>`
+				}
+                <wie-area>
+                <wie-line>${item.title}</wie-line>
+                <wie-line>
+                <wie-tag onclick='copy' data-copy='${item.code}'>${
+			item.code
+		}</wie-tag>
+                    ${this.renderScore("JavDB", item.score)}
+                 </wie-line>
+                <wie-line>
+                </wie-line>
+                </wie-area>
             </wie-area>
         `;
 	}
 
-	getFile(path: string) {
-		const targetDir = normalizePath(path);
-		const files = this.app.vault.getMarkdownFiles();
-		// 2. 过滤指定目录下的文件
-		const filteredFiles = files.filter((file) => {
-			const fileDir = normalizePath(file.parent?.path || "/"); // 获取文件所在目录
-			return fileDir.startsWith(targetDir);
-		});
+	renderScore(title: string, score?: IScore) {
+		if (!score) return "";
+		let html = `<wie-item class='gap-0'>${SVGConst.Score}<span>${
+			score.score
+		}</span><span>|${title}${
+			(
+				typeof score.num === "number"
+					? score.num > 0
+					: score.num.length > 0
+			)
+				? `|${score.num}人点评`
+				: ""
+		}</span></wie-item>`;
+		return html;
+	}
 
-		// 3. 按修改时间排序（从新到旧）
-		const sortedFiles = filteredFiles.sort(
-			(a, b) => b.stat.ctime - a.stat.ctime // 修改时间戳相减
+	open(e: Event) {
+		const key = (e.currentTarget as HTMLElement).getAttribute("code")!;
+		const data = this.dataCache[key];
+		const { code, files } = data;
+		new JavModal(this.app, { code, files }).open();
+	}
+
+	private get cachePath() {
+		return `${this.fileDir}/.${this.fileName}.json`;
+	}
+
+	private init() {
+		if (this._init) return;
+		this._init = true;
+		//获取本地
+		const json = Utils.read(this.cachePath);
+		if (json) this.dataCache = json;
+
+		console.log("init", this.dataCache);
+		this.syncData();
+	}
+
+	private syncData() {
+		const data = this.dataCache;
+		const list = Object.values(data);
+		list.sort((a, b) => {
+			return Number(a.files![0].ctime) - Number(b.files![0].ctime);
+		});
+		this.setState({ list });
+	}
+
+	private saveCache(cache: IDataCahe) {
+		this.dataCache = cache;
+		this.syncData();
+		Utils.write(this.cachePath, this.dataCache);
+	}
+
+	async scan(e: Event) {
+		const btn = e.currentTarget as HTMLElement;
+		if (btn.classList.contains("loading")) return;
+		btn.classList.add("loading");
+		//获取文件
+		const { path } = this.props;
+		//
+		const files: IFile[] = await Utils.fetch(
+			`${UrlConst.SCAN_PATH}?path=${path}`
 		);
 
-		// files[0].vault.
+		if (!files || files.length === 0) {
+			new Notice("未找到任何文件");
+			btn.classList.remove("loading");
+			return;
+		}
 
-		// console.log("--list-", sortedFiles, files, targetDir);
-		return sortedFiles;
+		const cache: IDataCahe = {};
+		//处理files
+		for (let file of files) {
+			//如果文件大小小于100M 则不添加
+			if (Number(file.size) < 100 * 1024 * 1024) continue;
+			const code = this.handleFile(file);
+			let data = cache[code.code];
+			if (data) {
+				const files = data.files ?? [];
+				//合并数据
+				Object.assign(data, code);
+				data.files = [...files, ...(code.files ?? [])];
+			} else {
+				cache[code.code] = code;
+			}
+		}
+		//
+		//更新
+		this.saveCache(cache);
+		btn.classList.remove("loading");
+	}
+
+	private handleFile(file: IFile): ICodeInfo {
+		//判断是否有cover
+		const data: ICodeInfo = {
+			code: file.name,
+			title: file.name || file.oname,
+			files: [file],
+		};
+
+		// const path = file.path.substring(0, file.path.lastIndexOf("/"));
+		const name = file.path.substring(0, file.path.lastIndexOf("."));
+
+		//判断是否有.json文件
+		const code: ICodeInfo = Utils.wrCode(file.name);
+
+		if (fs.existsSync(name + "-fanart.jpg")) {
+			data.cover = Utils.localImg(name + "-fanart.jpg");
+		}
+
+		if (code) {
+			//方便进行过滤
+			data.tags = code.tags || [];
+			data.title = code.title || data.title;
+			//保存actor
+			data.actors =
+				code.actors?.map((item) => ({ name: item.name })) || [];
+			data.releaseDate = code.releaseDate;
+			data.zh = code.zh;
+			data.leak = code.leak;
+			data.und = code.und;
+			data.score = code.score;
+
+			if (!data.cover) {
+				data.cover = Utils.proxyImg(code.cover!);
+			}
+		}
+
+		//判断是否有封面图
+		console.log("----sslist", name);
+
+		return data;
 	}
 }

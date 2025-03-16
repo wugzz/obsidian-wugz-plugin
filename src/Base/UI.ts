@@ -1,4 +1,5 @@
 import { App } from "obsidian";
+import * as path from "path";
 
 type GC<T = unknown> = new (...args: any[]) => T;
 
@@ -11,6 +12,8 @@ export default abstract class UI<T = any, S = any> {
 
 	protected uis: Set<UI<any>> = new Set();
 
+	private isMount: boolean = false;
+
 	constructor(protected app: App, readonly props: T = {} as any) {
 		this.view = null;
 		this.id = "w" + Math.random().toString(36).substring(7);
@@ -18,7 +21,7 @@ export default abstract class UI<T = any, S = any> {
 
 	setState(newState: S) {
 		this.state = { ...this.state, ...newState };
-		this.update();
+		if (this.isMount) this.update();
 	}
 
 	mount(container: HTMLElement) {
@@ -29,6 +32,7 @@ export default abstract class UI<T = any, S = any> {
 		//挂载子组件
 		this.uis.forEach((ui) => ui.mount(this.view!));
 		this.onMount();
+		this.isMount = true;
 	}
 
 	protected async onMount() {}
@@ -89,12 +93,22 @@ export default abstract class UI<T = any, S = any> {
 	}
 
 	protected getResourcePath(fileName: string): string | null {
-		// 获取 Obsidian 当前 Vault 中的所有文件
+		let path = this.getLocalPath(fileName);
+		return path ? this.app.vault.adapter.getResourcePath(path) : null;
+	}
+
+	protected localPath(filePath: string): string {
+		const basePath = (this.app.vault.adapter as any).basePath;
+		return path.resolve(basePath, filePath);
+	}
+
+	protected getLocalPath(fileName: string): string | null {
 		const files = this.app.vault.getFiles();
 		// 遍历所有文件，查找匹配的文件名
 		for (const file of files) {
 			if (file.name === fileName) {
-				return this.app.vault.adapter.getResourcePath(file.path); // 返回文件的完整路径
+				console.log("file.path", file);
+				return file.path; // 返回文件的完整路径
 			}
 		}
 		return null; // 如果未找到匹配的文件，返回 null

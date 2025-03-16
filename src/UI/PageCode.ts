@@ -20,12 +20,14 @@ import { ImageModal } from "src/Modal/ImageModal";
 
 interface IProp {
 	data: ICodeInfo;
-	file?: IFile;
+	// file?: IFile;
 }
 
 export interface IFile {
 	/** 名称 */
 	name: string;
+
+	oname?: string;
 	/** 文件路径 */
 	path: string;
 	/** 文件大小 */
@@ -70,7 +72,10 @@ export default class PageCode extends UI<IProp> {
 
 		const data = Utils.wrCode(code);
 		//处理
-		if (!data) return data ?? this.data;
+		if (!data) return this.data;
+
+		//优先当前文件列表
+		data.files = this.data.files;
 
 		//处理actors
 		if (!data.actors) return data;
@@ -130,7 +135,7 @@ export default class PageCode extends UI<IProp> {
 			data.releaseDate ?? "??"
 		}</wie-item>
                 </wie-line-wrap>
-                ${this.videoPath ? `<w-desc>${this.videoPath}</w-desc>` : ``}
+                ${this.renderFiles()}
                 <wie-line-wrap>
                 ${this.renderButton(
 					data as any,
@@ -153,7 +158,6 @@ export default class PageCode extends UI<IProp> {
                 </wie-line-wrap>
                 ${this.renderEmbyTag(data)}
             </wie-area>
-
             ${this.renderActors()}
             ${this.renderVideos()}
             ${this.renderTags()}
@@ -164,6 +168,15 @@ export default class PageCode extends UI<IProp> {
             ${this.renderMangets()}
         </div>
         `;
+	}
+
+	private renderFiles() {
+		const { files = [] } = this.data;
+		return files
+			.map((file) => {
+				return `<w-desc>${file.path}</w-desc>`;
+			})
+			.join();
 	}
 
 	async donwloadImages(e: Event) {
@@ -808,6 +821,6 @@ export default class PageCode extends UI<IProp> {
 	}
 
 	private get videoPath() {
-		return this.props.file?.path;
+		return this.data.files?.[0]?.path;
 	}
 }

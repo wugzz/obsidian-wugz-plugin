@@ -7,8 +7,7 @@ export default class JavVideo extends CodeBlack<IFile> {
 
 		return `
             ${this.ui(PageCode, {
-				data: { code: this.props.name },
-				file: this.props,
+				data: { code: this.props.name, files: [this.props] },
 			})}
         `;
 	}

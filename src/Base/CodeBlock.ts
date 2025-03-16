@@ -22,9 +22,14 @@ const parserSource = (source: string) => {
 };
 
 export default abstract class CodeBlack<T = any> extends UI<T> {
-	constructor(app: App, prop: string) {
+	constructor(
+		app: App,
+		prop: string,
+		protected cxt: MarkdownPostProcessorContext
+	) {
 		super(app, parserSource(prop) as T);
 		// this.plugin = plugin;
+		this.cxt = cxt;
 	}
 
 	mount(container: HTMLElement): void {
@@ -35,6 +40,27 @@ export default abstract class CodeBlack<T = any> extends UI<T> {
 	protected oPlugin(name: string) {
 		const plugins = (this.app as any).plugins.plugins;
 		return plugins[name];
+	}
+
+	/**
+	 * 当前文件路径
+	 * @returns
+	 */
+	protected get filePath() {
+		return this.localPath(this.cxt.sourcePath);
+	}
+
+	protected get fileName() {
+		return this.cxt.sourcePath.split(".").shift();
+	}
+
+	/**
+	 * 当前文件目录
+	 * @returns
+	 */
+	protected get fileDir() {
+		const path = this.filePath;
+		return path.substring(0, path.lastIndexOf("\\"));
 	}
 
 	protected getIcon(name: string | undefined) {

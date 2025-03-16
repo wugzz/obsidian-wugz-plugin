@@ -50,7 +50,8 @@ export default class MyPlugin extends Plugin {
 			this.registerMarkdownCodeBlockProcessor(name, (source, el, ctx) => {
 				let codeBlock: CodeBlock = new (CodeBlock as any)(
 					this.app,
-					source
+					source,
+					ctx
 				);
 				codeBlock.mount(el);
 			});

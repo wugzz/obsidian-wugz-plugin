@@ -15,6 +15,13 @@ export default class UrlConst {
 	public static readonly DOWNLOAD_FILE =
 		"http://localhost:5678/webhook/download";
 
+	/**
+	 * 扫描路径
+	 * @param path 路径
+	 * @param type 类型
+	 */
+	public static readonly SCAN_PATH = "http://localhost:5678/webhook/scanPath";
+
 	// public static readonly CACHE_CODES_PATH =
 	// 	"E:\\workspace\\n8n\\.cache\\jav\\codes\\";
 

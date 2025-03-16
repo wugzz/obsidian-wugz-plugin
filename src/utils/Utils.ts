@@ -92,6 +92,7 @@ export default class Utils {
 	}
 
 	public static localImg(localPath: string) {
+		localPath = localPath.replace(/\\/g, "/");
 		return `http://localhost:5678/webhook/img?path=${localPath}`;
 	}
 
