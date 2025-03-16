@@ -15,9 +15,10 @@ export default class UrlConst {
 	public static readonly DOWNLOAD_FILE =
 		"http://localhost:5678/webhook/download";
 
-	public static readonly CACHE_CODES_PATH =
-		"E:\\workspace\\n8n\\.cache\\jav\\codes\\";
+	// public static readonly CACHE_CODES_PATH =
+	// 	"E:\\workspace\\n8n\\.cache\\jav\\codes\\";
 
-	public static readonly CACHE_ACTORS_PATH =
-		"E:\\workspace\\n8n\\.cache\\jav\\actors\\";
+	public static readonly CACHE_CODES_PATH = "I:/videox/.cache/jav/codes/";
+
+	public static readonly CACHE_ACTORS_PATH = "I:/videox/.cache/jav/actors/";
 }

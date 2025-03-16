@@ -311,7 +311,7 @@ export default class PageCode extends UI<IProp> {
 				: ""
 		}
         </wie-line>
-        <div id='wie-previews' class='swiper-container'>
+        <div id='wie-previews' class='swiper-container swiper-images'>
         <div class='swiper-wrapper'>
 		    ${previews
 				.map(
@@ -346,7 +346,8 @@ export default class PageCode extends UI<IProp> {
 	}
 
 	private actorImage(actor: IActor, type: "avatar" | "cover") {
-		return actor[type];
+		// if (type === "avatar") return actor.avatar;
+		// return actor[type];
 		//判断本地有没有
 		let local = UrlConst.CACHE_ACTORS_PATH + `${actor.name}-${type}.jpg`;
 		local = local.replace(/\\/g, "/");
@@ -479,22 +480,22 @@ export default class PageCode extends UI<IProp> {
 
 			Utils.wrActor(actor.name, actor);
 
-			// //同步下载视频图片
-			// if (actor.cover) {
-			// 	await Utils.download(
-			// 		actor.cover,
-			// 		`${UrlConst.CACHE_ACTORS_PATH}`,
-			// 		`${actor.name}-cover.jpg`
-			// 	);
-			// }
-			// //同步小图
-			// if (actor.avatar) {
-			// 	await Utils.download(
-			// 		actor.avatar,
-			// 		`${UrlConst.CACHE_ACTORS_PATH}`,
-			// 		`${actor.name}-avatar.jpg`
-			// 	);
-			// }
+			//同步下载视频图片
+			if (actor.cover) {
+				await Utils.download(
+					Utils.proxyImg(actor.cover),
+					`${UrlConst.CACHE_ACTORS_PATH}`,
+					`${actor.name}-cover.jpg`
+				);
+			}
+			//同步小图
+			if (actor.avatar) {
+				await Utils.download(
+					actor.avatar,
+					`${UrlConst.CACHE_ACTORS_PATH}`,
+					`${actor.name}-avatar.jpg`
+				);
+			}
 
 			this.setState({});
 		}
