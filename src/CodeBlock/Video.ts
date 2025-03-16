@@ -13,14 +13,14 @@ interface IProp {
 }
 
 export default class Video extends CodeBlack<IProp> {
-	renderTemplate(): string {
+	render(): string {
 		const { url } = this.props;
 
 		let path = this.getResourcePath(url);
 		return `<video controls="" class='w-video' preload="metadata" src="${path}" ></video>`;
 	}
 
-	protected bindEvent(el: HTMLElement): void {
+	protected onEvent(el: HTMLElement): void {
 		const video = el.querySelector("video")!;
 		video.volume = 0.2;
 		video.addEventListener(

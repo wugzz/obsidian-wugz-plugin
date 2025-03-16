@@ -6,12 +6,12 @@ interface IProp {
 }
 
 export default class WButton extends CodeBlack<IProp> {
-	renderTemplate(): string {
+	render(): string {
 		const { name = "" } = this.props;
 		return `<button>${name}</button>`;
 	}
 
-	protected bindEvent(el: HTMLElement) {
+	protected onEvent(el: HTMLElement) {
 		//启动
 		const { href = "" } = this.props;
 		el.querySelector("button")?.addEventListener("click", () => {

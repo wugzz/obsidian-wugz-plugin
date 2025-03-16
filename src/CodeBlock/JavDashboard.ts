@@ -5,7 +5,7 @@ import { IActor } from "src/UI/ICodeInfo";
 import { normalizePath } from "obsidian";
 
 export default class JavDashboard extends CodeBlack<IFile> {
-	renderTemplate(): string {
+	render(): string {
 		//读取缓存文件
 		// this.getFile("Videos");
 		return `

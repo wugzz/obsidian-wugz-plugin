@@ -12,7 +12,7 @@ interface IProp {
 }
 
 export default class Card extends CodeBlack<IProp> {
-	renderTemplate(): string {
+	render(): string {
 		const { type = "def" } = this.props;
 		let func = (this as any)[type] ?? this.def;
 		return func.call(this);

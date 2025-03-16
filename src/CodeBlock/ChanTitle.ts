@@ -9,7 +9,7 @@ interface IProp {
 }
 
 export default class ChanTitle extends CodeBlack<IProp> {
-	renderTemplate(): string {
+	render(): string {
 		const { tid = "未知", count = 0, day, update } = this.props;
 		return `<wie-area><wie-line style='gap:20px'>
 <wie-item><w-name>ID:</w-name><wie-bold>${tid}</wie-bold></wie-item>
@@ -23,12 +23,12 @@ export default class ChanTitle extends CodeBlack<IProp> {
 <wie-item><wie-btn style='display:none'></wie-btn></wie-item></wie-line></wie-area>`;
 	}
 
-	protected bindEvent(el: HTMLElement) {
-		this.checkUpdate();
-		el.querySelector("wie-btn")?.addEventListener(
-			"click",
-			this.goUpdate.bind(this)
-		);
+	protected onEvent(el: HTMLElement) {
+		// this.checkUpdate();
+		// el.querySelector("wie-btn")?.addEventListener(
+		// 	"click",
+		// 	this.goUpdate.bind(this)
+		// );
 	}
 
 	private isUpdate: boolean = false;
@@ -71,7 +71,7 @@ export default class ChanTitle extends CodeBlack<IProp> {
 			const data = await res.json();
 			//如果大于当前值，则代表有更新
 			if (data.posts > Number(count)) {
-				const btn = this.view.querySelector("wie-btn") as HTMLElement;
+				const btn = this.view!.querySelector("wie-btn") as HTMLElement;
 				btn.innerHTML = `${SVGConst.Refresh} 有更新：${data.posts}`;
 				btn.style.display = "flex";
 			}

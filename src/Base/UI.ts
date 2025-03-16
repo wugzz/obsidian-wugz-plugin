@@ -26,6 +26,8 @@ export default abstract class UI<T = any, S = any> {
 		this.view.innerHTML = this.render();
 		this.bindEvents();
 		this.mountChildren();
+		//挂载子组件
+		this.uis.forEach((ui) => ui.mount(this.view!));
 		this.onMount();
 	}
 

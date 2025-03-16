@@ -201,7 +201,6 @@ export default class PageCode extends UI<IProp> {
 
 		const pre = this.view!.querySelector("#wie-previews") as HTMLElement;
 
-		console.log("pre", pre);
 		if (pre) {
 			new Swiper(
 				this.view!.querySelector("#wie-previews") as HTMLElement,

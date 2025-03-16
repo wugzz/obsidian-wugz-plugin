@@ -6,7 +6,7 @@ import Utils from "src/utils/Utils";
 import { IActor } from "src/UI/ICodeInfo";
 
 export default class JavVideo extends CodeBlack<IFile> {
-	renderTemplate(): string {
+	render(): string {
 		//读取缓存文件
 
 		const data = this.readJson();

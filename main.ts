@@ -45,9 +45,12 @@ export default class MyPlugin extends Plugin {
 
 	private initCodeBlocks() {
 		for (let [name, CodeBlock] of MyPlugin.CodeBlocks) {
-			this.registerMarkdownCodeBlockProcessor(name, (...args) => {
-				let codeBlock: CodeBlock = new (CodeBlock as any)(this);
-				codeBlock.render(...args);
+			this.registerMarkdownCodeBlockProcessor(name, (source, el, ctx) => {
+				let codeBlock: CodeBlock = new (CodeBlock as any)(
+					this.app,
+					source
+				);
+				codeBlock.mount(el);
 			});
 		}
 		// this.registerMarkdownPostProcessor
