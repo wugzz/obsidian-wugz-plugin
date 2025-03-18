@@ -60,12 +60,14 @@ export default class JavCard extends CodeBlack<IProp> {
 		const { code, title, score, num, releaseDate, link, cover } =
 			this.props;
 		new JavModal(this.app, {
-			code,
-			title,
-			score: { score: Number(score), num, total: 10 },
-			releaseDate,
-			link,
-			cover,
+			data: {
+				code,
+				title,
+				score: { score: Number(score), num, total: 10 },
+				releaseDate,
+				link,
+				cover,
+			},
 		}).open();
 	}
 

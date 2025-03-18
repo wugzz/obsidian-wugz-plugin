@@ -18,9 +18,11 @@ import GFriends from "src/utils/GFriends";
 import { Notice } from "obsidian";
 import { ImageModal } from "src/Modal/ImageModal";
 
-interface IProp {
+export interface IPageCode {
 	data: ICodeInfo;
 	// file?: IFile;
+
+	updateCodeInfo?: (code: ICodeInfo) => void;
 }
 
 export interface IFile {
@@ -38,7 +40,7 @@ export interface IFile {
 	cache: string;
 }
 
-export default class PageCode extends UI<IProp> {
+export default class PageCode extends UI<IPageCode> {
 	private _data?: ICodeInfo;
 
 	private get data(): ICodeInfo {
@@ -176,7 +178,7 @@ export default class PageCode extends UI<IProp> {
 			.map((file) => {
 				return `<w-desc>${file.path}</w-desc>`;
 			})
-			.join();
+			.join("");
 	}
 
 	async donwloadImages(e: Event) {
@@ -557,6 +559,8 @@ export default class PageCode extends UI<IProp> {
 	private updateCodeInfo() {
 		const data = this.data;
 		Utils.wrCode(data.code, data);
+		//更新
+		this.props.updateCodeInfo?.(data);
 		//更新actor
 		this.setState({});
 	}

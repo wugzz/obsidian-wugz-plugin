@@ -51,7 +51,10 @@ export default abstract class CodeBlack<T = any> extends UI<T> {
 	}
 
 	protected get fileName() {
-		return this.cxt.sourcePath.split(".").shift();
+		return this.cxt.sourcePath.substring(
+			this.cxt.sourcePath.lastIndexOf("/") + 1,
+			this.cxt.sourcePath.lastIndexOf(".")
+		);
 	}
 
 	/**

@@ -163,6 +163,7 @@ wie-bold{
     margin: 0 auto;
     height: 100%;
     display: inherit;
+    object-fit: cover;
 }
 
 wie-area{

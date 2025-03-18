@@ -8,6 +8,7 @@ import { IFile } from "src/UI/PageCode";
 import { ICodeInfo, IScore } from "src/UI/ICodeInfo";
 import * as fs from "fs";
 import { JavModal } from "src/Modal/JavModal";
+import InputHelper from "src/utils/InputHelper";
 
 interface IProps {
 	/** 路径 */
@@ -39,6 +40,13 @@ export default class JavDashboard extends CodeBlack<IProps> {
 		//读取缓存文件
 		// this.getFile("Videos");
 
+		console.log(
+			"----render---",
+			this.fileDir,
+			this.fileName,
+			this.filePath
+		);
+
 		const { name, cover, path } = this.props;
 		const { list = [] } = this.state;
 		console.log("---start---", list, this.state);
@@ -46,21 +54,63 @@ export default class JavDashboard extends CodeBlack<IProps> {
 		return `
             <wie-area style='margin-bottom:20px'>
                 <wie-line class='justify-between'>
+                    <wie-line>
                     <wie-title class='ellipsis-2'>${name}</wie-title>
+                    <input id='wie-filter'></input>
+                    </wie-line>
                     <wie-btn onclick='scan'>${
 						SVGConst.Refresh
 					} 重新检索资源</wie-btn>
                 </wie-line>
             </wie-area>
 
-            <wie-grid>
-                ${list
+            <wie-grid id='wie-grid'>
+                ${this.list
 					.map((item: ICodeInfo, index: number) =>
 						this.renderVideo(item, index)
 					)
 					.join("")}
             </wie-grid>
         `;
+	}
+
+	protected onEvent(view: HTMLElement): void {
+		const input = view.querySelector("#wie-filter") as HTMLInputElement;
+		new InputHelper(input, this.filter.bind(this));
+	}
+
+	filter(value: string) {
+		console.log("--filter-", value);
+		let filter: ICodeInfo[] | undefined = undefined;
+		if (value)
+			filter = this.state.list.filter((item: ICodeInfo) => {
+				return (
+					item.code.includes(value) ||
+					item.title?.includes(value) ||
+					(item.tags &&
+						new RegExp(item.tags.join("|")).test(value)) ||
+					(item.actors &&
+						new RegExp(
+							item.actors.map((item) => item.name).join("|")
+						).test(value))
+				);
+			});
+		this.setState({ filter }, false);
+		this.updateList();
+	}
+
+	private get list() {
+		return this.state.filter || this.state.list;
+	}
+
+	private updateList() {
+		const grid = this.view!.querySelector("#wie-grid")! as HTMLElement;
+		grid.innerHTML = this.list
+			.map((item: ICodeInfo, index: number) =>
+				this.renderVideo(item, index)
+			)
+			.join("");
+		this.bindEvents(grid);
 	}
 
 	private renderVideo(item: ICodeInfo, index: number) {
@@ -108,11 +158,21 @@ export default class JavDashboard extends CodeBlack<IProps> {
 		const key = (e.currentTarget as HTMLElement).getAttribute("code")!;
 		const data = this.dataCache[key];
 		const { code, files } = data;
-		new JavModal(this.app, { code, files }).open();
+		new JavModal(this.app, {
+			data: { code, files },
+			updateCodeInfo: this.updateCode.bind(this),
+		}).open();
 	}
 
 	private get cachePath() {
+		console.log("--cachePath-", this.fileDir, this.fileName);
 		return `${this.fileDir}/.${this.fileName}.json`;
+	}
+
+	private updateCode(info: ICodeInfo) {
+		const data = this.dataCache[info.code];
+		this.copyCode(data, info);
+		this.saveCache(this.dataCache);
 	}
 
 	private init() {
@@ -123,16 +183,19 @@ export default class JavDashboard extends CodeBlack<IProps> {
 		if (json) this.dataCache = json;
 
 		console.log("init", this.dataCache);
-		this.syncData();
+		this.syncData(false);
 	}
 
-	private syncData() {
+	private syncData(only: boolean = true) {
 		const data = this.dataCache;
 		const list = Object.values(data);
+
 		list.sort((a, b) => {
-			return Number(a.files![0].ctime) - Number(b.files![0].ctime);
+			return Number(b.files![0].ctime) - Number(a.files![0].ctime);
 		});
-		this.setState({ list });
+		console.log("----list", list);
+		this.setState({ list }, !only);
+		if (only) this.updateList();
 	}
 
 	private saveCache(cache: IDataCahe) {
@@ -200,25 +263,29 @@ export default class JavDashboard extends CodeBlack<IProps> {
 
 		if (code) {
 			//方便进行过滤
-			data.tags = code.tags || [];
-			data.title = code.title || data.title;
-			//保存actor
-			data.actors =
-				code.actors?.map((item) => ({ name: item.name })) || [];
-			data.releaseDate = code.releaseDate;
-			data.zh = code.zh;
-			data.leak = code.leak;
-			data.und = code.und;
-			data.score = code.score;
-
-			if (!data.cover) {
-				data.cover = Utils.proxyImg(code.cover!);
-			}
+			this.copyCode(data, code);
 		}
 
 		//判断是否有封面图
 		console.log("----sslist", name);
 
 		return data;
+	}
+
+	private copyCode(data: ICodeInfo, code: ICodeInfo) {
+		//方便进行过滤
+		data.tags = code.tags || [];
+		data.title = code.title || data.title;
+		//保存actor
+		data.actors = code.actors?.map((item) => ({ name: item.name })) || [];
+		data.releaseDate = code.releaseDate;
+		data.zh = code.zh;
+		data.leak = code.leak;
+		data.und = code.und;
+		data.score = code.score;
+
+		if (!data.cover) {
+			data.cover = Utils.proxyImg(code.cover!);
+		}
 	}
 }

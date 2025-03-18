@@ -17,9 +17,11 @@ export default class ChanTitle extends CodeBlack<IProp> {
 <wie-item><w-name>更新:</w-name><wie-bold>${
 			update ?? "--"
 		}</wie-bold></wie-item>
-<wie-item><w-name>原帖:</w-name><a class='wie-btn' target='_blank' href='https://boards.4chan.org/gif/thread/${tid}?day=${day}&count=${count}'>${
-			SVGConst.Detail
-		}地址</a></wie-item>
+${
+	tid !== "redgif"
+		? `<wie-item><w-name>原帖:</w-name><a class='wie-btn' target='_blank' href='https://boards.4chan.org/gif/thread/${tid}?day=${day}&count=${count}'>${SVGConst.Detail}地址</a></wie-item>`
+		: ""
+}
 <wie-item><wie-btn style='display:none'></wie-btn></wie-item></wie-line></wie-area>`;
 	}
 

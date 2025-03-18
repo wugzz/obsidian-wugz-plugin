@@ -1,13 +1,13 @@
 import { App, Modal } from "obsidian";
 import { ICodeInfo } from "src/UI/ICodeInfo";
-import PageCode from "src/UI/PageCode";
+import PageCode, { IPageCode } from "src/UI/PageCode";
 
 interface IProps {
 	code: string;
 }
 
 export class JavModal extends Modal {
-	constructor(app: App, private props: ICodeInfo) {
+	constructor(app: App, private props: IPageCode) {
 		super(app);
 	}
 
@@ -15,7 +15,7 @@ export class JavModal extends Modal {
 		const { contentEl } = this;
 		contentEl.parentElement!.style.width = "700px";
 
-		const page = new PageCode(this.app, { data: this.props });
+		const page = new PageCode(this.app, this.props);
 
 		contentEl.innerHTML = page.template();
 		page.mount(contentEl);

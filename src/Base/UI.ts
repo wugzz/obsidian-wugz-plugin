@@ -19,9 +19,9 @@ export default abstract class UI<T = any, S = any> {
 		this.id = "w" + Math.random().toString(36).substring(7);
 	}
 
-	setState(newState: S) {
+	setState(newState: S, update: boolean = true) {
 		this.state = { ...this.state, ...newState };
-		if (this.isMount) this.update();
+		if (this.isMount && update) this.update();
 	}
 
 	mount(container: HTMLElement) {
@@ -58,20 +58,15 @@ export default abstract class UI<T = any, S = any> {
 		}
 	}
 
-	private bindEvents() {
-		if (!this.view) return;
-		this.view
-			.querySelectorAll("[onclick]")
-			.forEach((el: HTMLDivElement) => {
-				const methodName = el.getAttribute("onclick");
-				if (
-					methodName &&
-					typeof (this as any)[methodName] === "function"
-				) {
-					el.onclick = (this as any)[methodName].bind(this);
-				}
-			});
-		this.onEvent(this.view);
+	protected bindEvents(view: HTMLElement | null = this.view) {
+		if (!view) return;
+		view.querySelectorAll("[onclick]").forEach((el: HTMLDivElement) => {
+			const methodName = el.getAttribute("onclick");
+			if (methodName && typeof (this as any)[methodName] === "function") {
+				el.onclick = (this as any)[methodName].bind(this);
+			}
+		});
+		if (this.view === view) this.onEvent(this.view);
 	}
 
 	private mountChildren() {
