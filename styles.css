@@ -155,6 +155,24 @@ wie-bold{
     font-weight: 700;
 }
 
+wie-video{
+    position:relative;
+    display: block;
+}
+
+wie-tags{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+wie-video wie-tags{
+    position:absolute;
+    right:10px;
+    top:10px;
+}
+
 .swiper-images{
     height: 417px;
 }
@@ -243,11 +261,26 @@ wie-title{
 
 
 wie-tag,
+wie-tag-n,
 wie-tag-z{
     background: var(--wie-color);
     color: var(--wie-background);
+    fill: currentColor;
     border-radius: 5px;
     padding: 2px 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+wie-tag svg,
+wie-tag-n svg{
+    height: 14px;
+    width: 14px;
+}
+
+wie-tag-n{
+    background: none;
+    font-weight: bold;
 }
 
 wie-tag-z{

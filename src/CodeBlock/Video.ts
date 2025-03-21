@@ -1,6 +1,7 @@
 import CodeBlack from "src/Base/CodeBlock";
 import * as fs from "fs";
 import { MarkdownView } from "obsidian";
+import SVGConst from "src/UI/SVGConst";
 
 interface IProp {
 	name: string;
@@ -10,14 +11,21 @@ interface IProp {
 	cachePath: string;
 
 	updateH: boolean;
+
+	view?: string;
 }
 
 export default class Video extends CodeBlack<IProp> {
 	render(): string {
-		const { url } = this.props;
+		const { url, view } = this.props;
 
 		let path = this.getResourcePath(url);
-		return `<video controls="" class='w-video' preload="metadata" src="${path}" ></video>`;
+		return `<wie-video>
+			<video controls="" class='w-video' preload="metadata" src="${path}" ></video>
+			<wie-tags>
+				${view ? `<wie-tag-n>${SVGConst.Play}${view}</wie-tag-n>` : ""}
+			</wie-tags>
+		</wie-video>`;
 	}
 
 	protected onEvent(el: HTMLElement): void {
@@ -42,6 +50,13 @@ export default class Video extends CodeBlack<IProp> {
 
 	videoEnded(video: HTMLVideoElement, write: boolean, uH: boolean = true) {
 		video.addClass("w-video-read");
+
+		this.view
+			?.querySelector("wie-tags")
+			?.insertAdjacentHTML(
+				"beforeend",
+				`<wie-tag-n>${SVGConst.Collect}</wie-tag-n>`
+			);
 
 		//添加本地缓存
 		if (write) fs.writeFileSync(this.cachePath(), "1");

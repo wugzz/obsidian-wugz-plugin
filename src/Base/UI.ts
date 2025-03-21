@@ -89,6 +89,7 @@ export default abstract class UI<T = any, S = any> {
 
 	protected getResourcePath(fileName: string): string | null {
 		let path = this.getLocalPath(fileName);
+
 		return path ? this.app.vault.adapter.getResourcePath(path) : null;
 	}
 
@@ -102,7 +103,6 @@ export default abstract class UI<T = any, S = any> {
 		// 遍历所有文件，查找匹配的文件名
 		for (const file of files) {
 			if (file.name === fileName) {
-				console.log("file.path", file);
 				return file.path; // 返回文件的完整路径
 			}
 		}
