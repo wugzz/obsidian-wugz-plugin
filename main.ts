@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 import CodeBlock from "src/Base/CodeBlock";
 import Card from "src/CodeBlock/Card";
 import ChanTitle from "src/CodeBlock/ChanTitle";
@@ -8,6 +8,7 @@ import JavVideo from "src/CodeBlock/JavVideo";
 import Tip from "src/CodeBlock/Tip";
 import Video from "src/CodeBlock/Video";
 import PluginSetting from "src/PluginSetting";
+import { MediaServer } from "src/Server/MediaServer";
 
 // Remember to rename these classes and interfaces!
 
@@ -32,17 +33,33 @@ export default class MyPlugin extends Plugin {
 
 	settings: MyPluginSettings;
 
+	private server: MediaServer;
+
+	private serverRunning: boolean = false;
+
 	async onload() {
 		await this.loadSettings();
 
 		//注册组件
 		// WCard.register("w-card");
+		this.initServer();
 
 		//初始化代码块
 		this.initCodeBlocks();
 
 		//注册设置Tab
 		this.addSettingTab(new PluginSetting(this.app, this));
+	}
+
+	private initServer() {
+		this.server = new MediaServer(1234);
+		try {
+			this.server.startServer();
+			this.serverRunning = true;
+		} catch (error) {
+			new Notice(`Failed to start server: ${error.message}`);
+			this.serverRunning = false;
+		}
 	}
 
 	private initCodeBlocks() {
@@ -59,7 +76,9 @@ export default class MyPlugin extends Plugin {
 		// this.registerMarkdownPostProcessor
 	}
 
-	onunload() {}
+	onunload() {
+		this.server.stopServer();
+	}
 
 	async loadSettings() {
 		this.settings = Object.assign(

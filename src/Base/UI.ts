@@ -1,6 +1,8 @@
 import { App, Modal } from "obsidian";
 import * as path from "path";
 import { BaseModal } from "src/Modal/BaseModal";
+import Utils from "src/utils/Utils";
+import * as fs from "fs";
 
 type GC<T = unknown> = new (...args: any[]) => T;
 
@@ -99,7 +101,6 @@ export default abstract class UI<T = any, S = any> {
 
 	protected getResourcePath(fileName: string): string | null {
 		let path = this.getLocalPath(fileName);
-
 		return path ? this.app.vault.adapter.getResourcePath(path) : null;
 	}
 
@@ -117,5 +118,27 @@ export default abstract class UI<T = any, S = any> {
 			}
 		}
 		return null; // 如果未找到匹配的文件，返回 null
+	}
+
+	openPath(e: Event) {
+		const btn = e.currentTarget as HTMLElement;
+		const path = btn.getAttribute("data-path")!;
+		if (!path) return;
+		Utils.openFolder(path);
+	}
+
+	play(e: Event) {
+		const btn = e.currentTarget as HTMLElement;
+		const path = btn.getAttribute("data-path")!;
+		if (!path) return;
+		Utils.openFile(path);
+	}
+
+	exist(path: string): boolean {
+		return fs.existsSync(path);
+	}
+
+	protected toLocalPath(path: string): string {
+		return "http://127.0.0.1:1234/?q=" + encodeURIComponent(path);
 	}
 }

@@ -18,6 +18,9 @@ export default class UrlConst {
 	public static readonly DOWNLOAD_FILE =
 		"http://localhost:5678/webhook/download";
 
+	public static readonly CREATE_VIDEOS_MD =
+		"http://localhost:5678/webhook/createVideoMarkdown";
+
 	/**
 	 * 扫描路径
 	 * @param path 路径

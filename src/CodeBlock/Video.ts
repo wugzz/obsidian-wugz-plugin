@@ -2,6 +2,7 @@ import CodeBlack from "src/Base/CodeBlock";
 import * as fs from "fs";
 import { MarkdownView } from "obsidian";
 import SVGConst from "src/UI/SVGConst";
+import Utils from "src/utils/Utils";
 
 interface IProp {
 	name: string;
@@ -13,23 +14,60 @@ interface IProp {
 	updateH: boolean;
 
 	view?: string;
+
+	path?: string;
 }
 
 export default class Video extends CodeBlack<IProp> {
 	render(): string {
-		const { url, view } = this.props;
+		let { url, view, path } = this.props;
 
-		let path = this.getResourcePath(url);
+		// let localPath = this.getResourcePath(url);
+
+		let videoPath = this.getLocalPath(url);
+		//如果为项目路径
+		if (videoPath) {
+			if (!path) path = this.localPath(videoPath);
+			videoPath = this.app.vault.adapter.getResourcePath(videoPath);
+		} else {
+			//本地代理路径
+			videoPath = this.toLocalPath(path || url);
+		}
+
+		return this.renderLocal(videoPath, path!);
+
+		// if (!localPath && path) return this.renderLocal();
 		return `<wie-video>
-			<video controls="" class='w-video' preload="metadata" src="${path}" ></video>
+			<video controls="" class='w-video' preload="metadata" src="${videoPath}" ></video>
 			<wie-tags>
 				${view ? `<wie-tag-n>${SVGConst.Play}${view}</wie-tag-n>` : ""}
 			</wie-tags>
 		</wie-video>`;
 	}
 
+	renderLocal(video: string, path: string) {
+		// const { name, path } = this.props;
+		// if (!path) return "";
+		const { view } = this.props;
+
+		const folder = path.substring(0, path.lastIndexOf("\\"));
+		return `<wie-area style='padding:0;gap:0;'>
+			<video controls="" class='w-video' style='border-radius:0px' preload="metadata" src="${video}" ></video>
+			<wie-line style='padding:15px'>
+				<wie-btn onclick='play' data-path='${path}'>${SVGConst.Play}本地播放</wie-btn>
+				<wie-btn onclick='openPath' data-path='${folder}'>${
+			SVGConst.Detail
+		}打开目录</wie-btn>
+			</wie-line>
+			<wie-tags>
+				${view ? `<wie-tag-n>${SVGConst.Play}${view}</wie-tag-n>` : ""}
+			</wie-tags>
+		</wie-area>`;
+	}
+
 	protected onEvent(el: HTMLElement): void {
 		const video = el.querySelector("video")!;
+		if (!video) return;
 		video.volume = 0.2;
 		video.addEventListener(
 			"ended",

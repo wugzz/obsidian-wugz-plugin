@@ -1,11 +1,19 @@
+import { Notice } from "obsidian";
 import CodeBlack from "src/Base/CodeBlock";
 import SVGConst from "src/UI/SVGConst";
+import UrlConst from "src/utils/UrlConst";
+import Utils from "src/utils/Utils";
 
 interface IProp {
 	tid?: string;
 	count?: string;
 	day?: string;
 	update?: string;
+
+	type?: "4chan" | "localVideo";
+
+	folder?: string;
+	title?: string;
 }
 
 export default class ChanTitle extends CodeBlack<IProp> {
@@ -18,17 +26,53 @@ export default class ChanTitle extends CodeBlack<IProp> {
 			update ?? "--"
 		}</wie-bold></wie-item>
 ${
-	tid !== "redgif"
+	this.isChan
 		? `<wie-item><a class='wie-btn' target='_blank' href='https://boards.4chan.org/gif/thread/${tid}?day=${day}&count=${count}'>4Chan</a></wie-item>
-		<wie-item><a class='wie-btn' target='_blank' href='https://archived.moe/gif/thread/${tid}?day=${day}&count=${count}'>Archived</a></wie-item>`
+		<wie-item><a class='wie-btn' target='_blank' href='https://archived.moe/gif/thread/${tid}?day=${day}&count=${count}'>Archived</a></wie-item>
+		<wie-item><wie-btn class='loading'>${SVGConst.Refresh}检查更新中</wie-btn></wie-item>`
 		: ""
 }
-<wie-item><wie-btn class='loading'>${
-			SVGConst.Refresh
-		}检查更新中</wie-btn></wie-item></wie-line></wie-area>`;
+	${this.renderLocalVideos()}
+		</wie-line>
+	</wie-area>`;
 	}
+
+	renderLocalVideos() {
+		const { type, folder, title } = this.props;
+
+		if (type !== "localVideo" || !folder || !title) return "";
+
+		return `<wie-btn onclick='recheck'>${SVGConst.Refresh}重新检索目录生成</wie-btn>`;
+	}
+
+	protected async recheck(e: Event) {
+		const btn = e.currentTarget as HTMLElement;
+		if (btn.hasClass("loading")) return;
+		btn.addClass("loading");
+
+		const { folder, title } = this.props;
+
+		//请求
+		const ret = await Utils.fetch(
+			UrlConst.CREATE_VIDEOS_MD + `?path=${folder}&title=${title}`
+		);
+
+		if (ret) {
+			new Notice("生成成功");
+		} else {
+			new Notice("生成失败，请重试");
+		}
+		btn.removeClass("loading");
+	}
+
+	private get isChan() {
+		const { tid = "" } = this.props;
+		if (tid === "redgif" || tid === "custom") return false;
+		return true;
+	}
+
 	protected onEvent(el: HTMLElement) {
-		if (this.props.tid === "redgif") return;
+		if (!this.isChan) return;
 
 		this.checkUpdate();
 		el.querySelector("wie-btn")?.addEventListener(

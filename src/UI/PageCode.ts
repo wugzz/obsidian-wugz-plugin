@@ -246,19 +246,19 @@ export default class PageCode extends UI<IPageCode> {
 		new Notice("下载完成");
 	}
 
-	openPath(e: Event) {
-		const btn = e.currentTarget as HTMLElement;
-		const path = btn.getAttribute("data-path")!;
-		if (!path) return;
-		Utils.openFolder(path);
-	}
+	// openPath(e: Event) {
+	// 	const btn = e.currentTarget as HTMLElement;
+	// 	const path = btn.getAttribute("data-path")!;
+	// 	if (!path) return;
+	// 	Utils.openFolder(path);
+	// }
 
-	play(e: Event) {
-		const btn = e.currentTarget as HTMLElement;
-		const path = btn.getAttribute("data-path")!;
-		if (!path) return;
-		Utils.openFile(path);
-	}
+	// play(e: Event) {
+	// 	const btn = e.currentTarget as HTMLElement;
+	// 	const path = btn.getAttribute("data-path")!;
+	// 	if (!path) return;
+	// 	Utils.openFile(path);
+	// }
 
 	protected onEvent() {
 		if (!this.data) return;
