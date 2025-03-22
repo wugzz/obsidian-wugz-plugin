@@ -128,11 +128,14 @@ wie-grid{
     gap: 20px;
 }
 
-.view-content{
+.view-content,
+.modal{
     --wie-color:#333;
     --wie-desc:#999;
     --wie-background:#FFF;
 }
+
+
 
 .w-page-code{
     color: #333;
@@ -197,6 +200,23 @@ wie-area{
     /* background: var(--tab-container-background); */
 }
 
+wie-center{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    color: var(--wie-color);
+    background: var(--wie-background);
+    gap: 10px;
+    border-radius: 8px;
+}
+
+wie-column{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 wie-area svg{
     width: 20px;
     height: 20px;
@@ -221,6 +241,7 @@ wie-card{
     border-radius: 8px;
     display: block;
     overflow: hidden;
+    color: var(--wie-color);
 }
 
 wie-card-info{
@@ -257,6 +278,19 @@ wie-title{
 .wie-red{
     color: #F44336;
     fill: currentColor;
+}
+
+.wie-null{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 250px;
+    color: var(--wie-desc);
+}
+
+.wie-null svg{
+    width: 100px;
+    height: 100px;
 }
 
 
@@ -323,10 +357,12 @@ w-name{
 wie-line-wrap{
     flex-wrap: wrap;
 }
-w-desc{
+w-desc,
+wie-desc{
     color: var(--wie-desc);
 }
-w-desc.active{
+w-desc.active,
+wie-desc.active{
     color: var(--wie-color);
     font-weight: 700;
     font-size: 1.1em;
@@ -459,7 +495,63 @@ wie-avatar img:hover {
 }   
 
 
+/*********************************************************
+wie-code
+*********************************************************/
+wie-codes{
+    border-left: 1px dashed var(--wie-color);
+    padding: 0 10px;
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+}
 
+wie-codes .split{
+    width: 10px;
+    height: 2px;
+    background-color: var(--wie-color);
+    position: absolute;
+    left: 10px;
+}
+
+wie-code-line{
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding: 5px 0;
+    position: relative;
+    overflow: auto hidden;
+}
+
+wie-code{
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+wie-code>img{
+  height: 150px;
+  width: 105px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 5px #ccccccc2;
+  transition: transform 0.3s ease;
+  transform: scale(1);
+  border: 1px solid var(--mainColor);
+  object-fit: cover;
+  object-position: right;
+}
+wie-code>img:hover{
+  transform: scale(1.02);
+}
+
+wie-code .code {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+}
 
 
 
@@ -686,3 +778,212 @@ Author: Vladimir Kharlampidi
 
 
 
+/***
+ loading
+***/
+
+
+  .wie-loading {
+    width: 6em;
+    height: 6em;
+  }
+  
+  .pl__ring {
+    animation: ringA 2s linear infinite;
+  }
+  
+  .pl__ring--a {
+    stroke: #f42f25;
+  }
+  
+  .pl__ring--b {
+    animation-name: ringB;
+    stroke: #f49725;
+  }
+  
+  .pl__ring--c {
+    animation-name: ringC;
+    stroke: #255ff4;
+  }
+  
+  .pl__ring--d {
+    animation-name: ringD;
+    stroke: #f42582;
+  }
+  
+  /* Animations */
+  @keyframes ringA {
+    from, 4% {
+      stroke-dasharray: 0 660;
+      stroke-width: 20;
+      stroke-dashoffset: -330;
+    }
+  
+    12% {
+      stroke-dasharray: 60 600;
+      stroke-width: 30;
+      stroke-dashoffset: -335;
+    }
+  
+    32% {
+      stroke-dasharray: 60 600;
+      stroke-width: 30;
+      stroke-dashoffset: -595;
+    }
+  
+    40%, 54% {
+      stroke-dasharray: 0 660;
+      stroke-width: 20;
+      stroke-dashoffset: -660;
+    }
+  
+    62% {
+      stroke-dasharray: 60 600;
+      stroke-width: 30;
+      stroke-dashoffset: -665;
+    }
+  
+    82% {
+      stroke-dasharray: 60 600;
+      stroke-width: 30;
+      stroke-dashoffset: -925;
+    }
+  
+    90%, to {
+      stroke-dasharray: 0 660;
+      stroke-width: 20;
+      stroke-dashoffset: -990;
+    }
+  }
+  
+  @keyframes ringB {
+    from, 12% {
+      stroke-dasharray: 0 220;
+      stroke-width: 20;
+      stroke-dashoffset: -110;
+    }
+  
+    20% {
+      stroke-dasharray: 20 200;
+      stroke-width: 30;
+      stroke-dashoffset: -115;
+    }
+  
+    40% {
+      stroke-dasharray: 20 200;
+      stroke-width: 30;
+      stroke-dashoffset: -195;
+    }
+  
+    48%, 62% {
+      stroke-dasharray: 0 220;
+      stroke-width: 20;
+      stroke-dashoffset: -220;
+    }
+  
+    70% {
+      stroke-dasharray: 20 200;
+      stroke-width: 30;
+      stroke-dashoffset: -225;
+    }
+  
+    90% {
+      stroke-dasharray: 20 200;
+      stroke-width: 30;
+      stroke-dashoffset: -305;
+    }
+  
+    98%, to {
+      stroke-dasharray: 0 220;
+      stroke-width: 20;
+      stroke-dashoffset: -330;
+    }
+  }
+  
+  @keyframes ringC {
+    from {
+      stroke-dasharray: 0 440;
+      stroke-width: 20;
+      stroke-dashoffset: 0;
+    }
+  
+    8% {
+      stroke-dasharray: 40 400;
+      stroke-width: 30;
+      stroke-dashoffset: -5;
+    }
+  
+    28% {
+      stroke-dasharray: 40 400;
+      stroke-width: 30;
+      stroke-dashoffset: -175;
+    }
+  
+    36%, 58% {
+      stroke-dasharray: 0 440;
+      stroke-width: 20;
+      stroke-dashoffset: -220;
+    }
+  
+    66% {
+      stroke-dasharray: 40 400;
+      stroke-width: 30;
+      stroke-dashoffset: -225;
+    }
+  
+    86% {
+      stroke-dasharray: 40 400;
+      stroke-width: 30;
+      stroke-dashoffset: -395;
+    }
+  
+    94%, to {
+      stroke-dasharray: 0 440;
+      stroke-width: 20;
+      stroke-dashoffset: -440;
+    }
+  }
+  
+  @keyframes ringD {
+    from, 8% {
+      stroke-dasharray: 0 440;
+      stroke-width: 20;
+      stroke-dashoffset: 0;
+    }
+  
+    16% {
+      stroke-dasharray: 40 400;
+      stroke-width: 30;
+      stroke-dashoffset: -5;
+    }
+  
+    36% {
+      stroke-dasharray: 40 400;
+      stroke-width: 30;
+      stroke-dashoffset: -175;
+    }
+  
+    44%, 50% {
+      stroke-dasharray: 0 440;
+      stroke-width: 20;
+      stroke-dashoffset: -220;
+    }
+  
+    58% {
+      stroke-dasharray: 40 400;
+      stroke-width: 30;
+      stroke-dashoffset: -225;
+    }
+  
+    78% {
+      stroke-dasharray: 40 400;
+      stroke-width: 30;
+      stroke-dashoffset: -395;
+    }
+  
+    86%, to {
+      stroke-dasharray: 0 440;
+      stroke-width: 20;
+      stroke-dashoffset: -440;
+    }
+  }

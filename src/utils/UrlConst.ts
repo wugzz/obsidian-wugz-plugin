@@ -6,6 +6,9 @@ export default class UrlConst {
 	public static readonly GET_ACTOR_INFO =
 		"http://localhost:5678/webhook/getActorInfo";
 
+	public static readonly GET_ACTOR_CODES =
+		"http://localhost:5678/webhook/getActorCodes";
+
 	public static readonly GET_CODE_INFO =
 		"http://localhost:5678/webhook/getCodeInfo";
 

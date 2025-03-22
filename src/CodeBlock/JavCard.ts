@@ -48,7 +48,7 @@ export default class JavCard extends CodeBlack<IProp> {
 				<a class='wie-btn' target='_blank' href='${data.link}' >${
 			SVGConst.Detail
 		}JavDB</a>
-		<wie-btn onclick='open'>${SVGConst.Detail} 详情</wie-btn>
+		<wie-btn onclick='openJav'>${SVGConst.Detail} 详情</wie-btn>
 			</wie-line-wrap>
 			${Number(data.score) >= 9 ? `<wie-stamp>${SVGConst.HighRate}</wie-stamp>` : ``}
 		</wie-area>
@@ -56,7 +56,7 @@ export default class JavCard extends CodeBlack<IProp> {
         `;
 	}
 
-	open() {
+	openJav() {
 		const { code, title, score, num, releaseDate, link, cover } =
 			this.props;
 		new JavModal(this.app, {

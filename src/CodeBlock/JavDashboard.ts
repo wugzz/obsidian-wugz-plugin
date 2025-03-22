@@ -117,7 +117,7 @@ export default class JavDashboard extends CodeBlack<IProps> {
 		return `
             <wie-area style='padding:0;cursor:pointer;' code=${
 				item.code
-			} onclick='open' >
+			} onclick='openJav' >
                 ${
 					item.cover
 						? `<img src="${item.cover}" />`
@@ -154,7 +154,7 @@ export default class JavDashboard extends CodeBlack<IProps> {
 		return html;
 	}
 
-	open(e: Event) {
+	openJav(e: Event) {
 		const key = (e.currentTarget as HTMLElement).getAttribute("code")!;
 		const data = this.dataCache[key];
 		const { code, files } = data;

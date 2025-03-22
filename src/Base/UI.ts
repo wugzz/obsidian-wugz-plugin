@@ -1,5 +1,6 @@
-import { App } from "obsidian";
+import { App, Modal } from "obsidian";
 import * as path from "path";
+import { BaseModal } from "src/Modal/BaseModal";
 
 type GC<T = unknown> = new (...args: any[]) => T;
 
@@ -29,8 +30,6 @@ export default abstract class UI<T = any, S = any> {
 		this.view.innerHTML = this.render();
 		this.bindEvents();
 		this.mountChildren();
-		//挂载子组件
-		this.uis.forEach((ui) => ui.mount(this.view!));
 		this.onMount();
 		this.isMount = true;
 	}
@@ -52,6 +51,9 @@ export default abstract class UI<T = any, S = any> {
 
 	private update() {
 		if (this.view) {
+			//清空子组件
+			this.uis.forEach((ui) => ui.unmount());
+			this.uis.clear();
 			this.view.innerHTML = this.render();
 			this.bindEvents();
 			this.mountChildren();
@@ -71,6 +73,8 @@ export default abstract class UI<T = any, S = any> {
 
 	private mountChildren() {
 		if (!this.view) return;
+		//挂载子组件
+		this.uis.forEach((ui) => ui.mount(this.view!));
 		this.view.querySelectorAll("[data-component]").forEach((el) => {
 			const componentName = el.getAttribute("data-component");
 			if (componentName && (this as any)[componentName] instanceof UI) {
@@ -85,6 +89,12 @@ export default abstract class UI<T = any, S = any> {
 		const ui = new UI(this.app, props);
 		this.uis.add(ui);
 		return ui.template();
+	}
+
+	protected open<T extends BaseModal<any>>(UI: GC<T>, props: T["props"]) {
+		const modal = new UI(this.app, props);
+		modal.open();
+		return modal;
 	}
 
 	protected getResourcePath(fileName: string): string | null {
