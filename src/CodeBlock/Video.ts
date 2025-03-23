@@ -24,15 +24,18 @@ export default class Video extends CodeBlack<IProp> {
 
 		// let localPath = this.getResourcePath(url);
 
-		let videoPath = this.getLocalPath(url);
-		//如果为项目路径
-		if (videoPath) {
-			if (!path) path = this.localPath(videoPath);
-			videoPath = this.app.vault.adapter.getResourcePath(videoPath);
-		} else {
-			//本地代理路径
-			videoPath = this.toLocalPath(path || url);
+		if (!path) {
+			path = `I:\\videox\\note\\Movie\\4Chan\\.videos\\${url}`;
 		}
+
+		// let videoPath = this.getLocalPath(url);
+		// //如果为项目路径
+		// if (videoPath) {
+		// 	if (!path) path = this.localPath(videoPath);
+		// 	// videoPath = this.app.vault.adapter.getResourcePath(videoPath);
+		// }
+		// //本地代理路径
+		let videoPath = this.toLocalPath(path || url);
 
 		return this.renderLocal(videoPath, path!);
 

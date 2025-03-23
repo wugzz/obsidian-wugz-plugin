@@ -21,20 +21,24 @@ export default class ChanTitle extends CodeBlack<IProp> {
 		const { tid = "未知", count = 0, day, update } = this.props;
 		return `<wie-area><wie-line style='gap:15px'>
 <wie-item><w-name>ID:</w-name><wie-bold>${tid}</wie-bold></wie-item>
-<wie-item><w-name>图片:</w-name><wie-bold>${count}</wie-bold></wie-item>
+<wie-item><w-name>视频:</w-name><wie-bold>${count}</wie-bold></wie-item>
 <wie-item><w-name>更新:</w-name><wie-bold>${
 			update ?? "--"
 		}</wie-bold></wie-item>
-${
-	this.isChan
-		? `<wie-item><a class='wie-btn' target='_blank' href='https://boards.4chan.org/gif/thread/${tid}?day=${day}&count=${count}'>4Chan</a></wie-item>
-		<wie-item><a class='wie-btn' target='_blank' href='https://archived.moe/gif/thread/${tid}?day=${day}&count=${count}'>Archived</a></wie-item>
-		<wie-item><wie-btn class='loading'>${SVGConst.Refresh}检查更新中</wie-btn></wie-item>`
-		: ""
-}
+
+		${this.renderChanOpt()}
 	${this.renderLocalVideos()}
 		</wie-line>
 	</wie-area>`;
+	}
+
+	renderChanOpt() {
+		if (!this.isChan) return "";
+		const { tid = "未知", count = 0, day } = this.props;
+		return `<wie-item><a class='wie-btn' target='_blank' href='https://boards.4chan.org/gif/thread/${tid}?day=${day}&count=${count}'>4Chan</a></wie-item>
+		<wie-item><a class='wie-btn' target='_blank' href='https://archived.moe/gif/thread/${tid}?day=${day}&count=${count}'>Archived</a></wie-item>
+		`;
+		//<wie-item><wie-btn class='loading'>${SVGConst.Refresh}检查更新中</wie-btn></wie-item>
 	}
 
 	renderLocalVideos() {
@@ -74,11 +78,11 @@ ${
 	protected onEvent(el: HTMLElement) {
 		if (!this.isChan) return;
 
-		this.checkUpdate();
-		el.querySelector("wie-btn")?.addEventListener(
-			"click",
-			this.goUpdate.bind(this)
-		);
+		// this.checkUpdate();
+		// el.querySelector("wie-btn")?.addEventListener(
+		// 	"click",
+		// 	this.goUpdate.bind(this)
+		// );
 	}
 
 	private isUpdate: boolean = false;
