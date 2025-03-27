@@ -47,6 +47,8 @@ export class MediaServer {
 				["webm", "video/webm"],
 				["ogg", "video/ogg"],
 				["ogv", "video/ogg"],
+				["ts", "video/mp2t"], // ✅ 支持 .ts (MPEG-TS) 视频
+				["m3u8", "application/vnd.apple.mpegurl"], // ✅ HLS (Apple HTTP Live Streaming)
 				["oga", "audio/ogg"],
 				["mp3", "audio/mpeg"],
 				["wav", "audio/wav"],
@@ -90,7 +92,16 @@ export class MediaServer {
 					"Content-Type": contentType,
 					"Accept-Ranges": "bytes",
 				});
-				fs.createReadStream(fullPath).pipe(res);
+
+				const fileStream = fs.createReadStream(fullPath);
+
+				// 监听客户端中途关闭，及时释放资源
+				req.on("close", () => {
+					fileStream.destroy();
+					console.log("Client disconnected, file stream closed.");
+				});
+
+				fileStream.pipe(res);
 			}
 		});
 

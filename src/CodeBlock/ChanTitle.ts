@@ -20,10 +20,16 @@ export default class ChanTitle extends CodeBlack<IProp> {
 	render(): string {
 		const { tid = "未知", count = 0, day, update } = this.props;
 		return `<wie-area><wie-line style='gap:15px'>
-<wie-item><w-name>ID:</w-name><wie-bold>${tid}</wie-bold></wie-item>
+${
+	this.isChan
+		? `<wie-item><w-name>ID:</w-name><wie-bold>${tid}</wie-bold></wie-item>`
+		: ""
+}
 <wie-item><w-name>视频:</w-name><wie-bold>${count}</wie-bold></wie-item>
 <wie-item><w-name>更新:</w-name><wie-bold>${
-			update ?? "--"
+			Utils.formatRelativeTime(
+				update?.replace(/年|月/g, "-").replace(/日/g, "")
+			).replace(":00", "") ?? "--"
 		}</wie-bold></wie-item>
 
 		${this.renderChanOpt()}
@@ -42,23 +48,39 @@ export default class ChanTitle extends CodeBlack<IProp> {
 	}
 
 	renderLocalVideos() {
-		const { type, folder, title } = this.props;
+		const { type, folder } = this.props;
 
-		if (type !== "localVideo" || !folder || !title) return "";
+		if (type !== "localVideo" || !folder) return "";
 
 		return `<wie-btn onclick='recheck'>${SVGConst.Refresh}重新检索目录生成</wie-btn>`;
 	}
 
 	protected async recheck(e: Event) {
 		const btn = e.currentTarget as HTMLElement;
+
+		const file = this.app.workspace.getActiveFile();
+
+		if (!file) return;
+
+		let path = this.localPath(file.path);
+
+		//获取目录
+		let tFolder = path.split("\\").slice(0, -1).join("/");
+		//获取名称
+		let title = path.split("\\").pop()!.replace(".md", "");
+		console.log("--recheck--", file, path, tFolder, title);
+
+		// return;
+
 		if (btn.hasClass("loading")) return;
 		btn.addClass("loading");
 
-		const { folder, title } = this.props;
+		const { folder } = this.props;
 
 		//请求
 		const ret = await Utils.fetch(
-			UrlConst.CREATE_VIDEOS_MD + `?path=${folder}&title=${title}`
+			UrlConst.CREATE_VIDEOS_MD +
+				`?path=${folder}&title=${title}&folder=${tFolder}`
 		);
 
 		if (ret) {

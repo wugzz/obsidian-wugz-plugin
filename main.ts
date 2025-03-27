@@ -2,6 +2,7 @@ import { Notice, Plugin } from "obsidian";
 import CodeBlock from "src/Base/CodeBlock";
 import Card from "src/CodeBlock/Card";
 import ChanTitle from "src/CodeBlock/ChanTitle";
+import FindVideo from "src/CodeBlock/FindVideo";
 import JavCard from "src/CodeBlock/JavCard";
 import JavDashboard from "src/CodeBlock/JavDashboard";
 import JavVideo from "src/CodeBlock/JavVideo";
@@ -29,6 +30,7 @@ export default class MyPlugin extends Plugin {
 		["JavVideo", JavVideo],
 		["JavDashboard", JavDashboard],
 		["JavCard", JavCard],
+		["FindVideo", FindVideo],
 	];
 
 	settings: MyPluginSettings;

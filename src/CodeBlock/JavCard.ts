@@ -31,14 +31,14 @@ export default class JavCard extends CodeBlack<IProp> {
 			<wie-line-wrap>
 				${data.lastRank === "0" ? `${SVGConst.New}` : ``}
 				${
-					level < 0
+					data.lastRank !== "0" && level < 0
 						? `<wie-item class='wie-red'>${
 								SVGConst.Up
 						  }<wie-bold>${-level}</wie-bold></wie-item>`
 						: ""
 				}
 				${
-					level > 0
+					data.lastRank !== "0" && level > 0
 						? `<wie-item class='wie-green'>${SVGConst.Down}<wie-bold>${level}</wie-bold></wie-item>`
 						: ""
 				}

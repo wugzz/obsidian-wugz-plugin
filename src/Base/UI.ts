@@ -141,4 +141,17 @@ export default abstract class UI<T = any, S = any> {
 	protected toLocalPath(path: string): string {
 		return "http://127.0.0.1:1234/?q=" + encodeURIComponent(path);
 	}
+
+	protected btnToLoading(e: Event | HTMLElement) {
+		const btn =
+			e instanceof HTMLElement ? e : (e.currentTarget as HTMLElement);
+
+		if (btn.classList.contains("loading")) return false;
+		btn.addClass("loading");
+		return true;
+	}
+
+	protected btnToNormal(btn: HTMLElement) {
+		btn?.removeClass("loading");
+	}
 }

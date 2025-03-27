@@ -5,6 +5,49 @@ import { exec } from "child_process";
 const copy = require("copy-to-clipboard");
 
 export default class Utils {
+	/**
+	 * 格式化时间显示
+	 * @param date 输入的时间（可以是 Date 对象或时间戳）
+	 * @returns 格式化后的时间字符串
+	 */
+	public static formatRelativeTime(date?: Date | number | string): string {
+		if (!date) return "";
+		const now = new Date();
+		const target = new Date(date);
+		const timeFormatter = (d: Date) => d.toTimeString().slice(0, 8); // HH:mm:ss
+
+		// 核心时间差计算（毫秒级精度）
+		const delta = now.getTime() - target.getTime();
+		const seconds = Math.floor(delta / 1000);
+
+		// 当天时间计算（基于自然日判断）
+		const isSameDay = (a: Date, b: Date) =>
+			a.getFullYear() === b.getFullYear() &&
+			a.getMonth() === b.getMonth() &&
+			a.getDate() === b.getDate();
+
+		// 动态日期描述逻辑
+		if (seconds < 60) return `${seconds}秒前`;
+		if (seconds < 3600) return `${Math.floor(seconds / 60)}分钟前`;
+
+		if (isSameDay(now, target)) {
+			return `今天 ${timeFormatter(target)}`; // 当天非近况显示具体时间
+		}
+
+		const yesterday = new Date(now);
+		yesterday.setDate(now.getDate() - 1);
+		if (isSameDay(yesterday, target))
+			return `昨天 ${timeFormatter(target)}`;
+
+		const dayBeforeYesterday = new Date(yesterday);
+		dayBeforeYesterday.setDate(yesterday.getDate() - 1);
+		if (isSameDay(dayBeforeYesterday, target))
+			return `前天 ${timeFormatter(target)}`;
+
+		// 超过3天，显示完整日期时间
+		return typeof date === "string" ? date : date.toLocaleString();
+	}
+
 	public static copy(value: string | object) {
 		if (!value) return;
 		try {
