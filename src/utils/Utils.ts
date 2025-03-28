@@ -48,6 +48,38 @@ export default class Utils {
 		return typeof date === "string" ? date : date.toLocaleString();
 	}
 
+	/**
+	 * 是否已经查看
+	 */
+	public static async isView(name: string, table = "view") {
+		const item = await this.fetch(
+			UrlConst.VIEW_IS + `?name=${name}&table=${table}`
+		);
+		return !!item?._id;
+	}
+
+	/**
+	 * 执行已读
+	 * @param name
+	 */
+	public static async viewed(name: string, table = "view") {
+		const item = await this.fetch(
+			UrlConst.VIEW +
+				`?name=${name}&table=${table}&date=${new Date().toISOString()}`
+		);
+	}
+
+	/**
+	 * 执行已读
+	 * @param name
+	 */
+	public static async viewDelete(name: string, table = "view") {
+		const item = await this.fetch(
+			UrlConst.VIEW_DELETE +
+				`?name=${name}&table=${table}&date=${new Date().toISOString()}`
+		);
+	}
+
 	public static copy(value: string | object) {
 		if (!value) return;
 		try {

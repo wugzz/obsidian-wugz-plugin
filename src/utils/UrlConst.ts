@@ -21,6 +21,13 @@ export default class UrlConst {
 	public static readonly CREATE_VIDEOS_MD =
 		"http://localhost:5678/webhook/createVideoMarkdown";
 
+	public static readonly VIEW_IS = "http://localhost:5678/webhook/viewIs";
+
+	public static readonly VIEW = "http://localhost:5678/webhook/view";
+
+	public static readonly VIEW_DELETE =
+		"http://localhost:5678/webhook/viewDelete";
+
 	/**
 	 * 扫描路径
 	 * @param path 路径

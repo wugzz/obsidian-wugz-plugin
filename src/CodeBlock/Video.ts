@@ -15,7 +15,17 @@ interface IProp {
 
 	updateH: boolean;
 
+	/**光看次数 */
 	view?: string;
+
+	/** 类型 */
+	type?: string;
+
+	/** 时长 */
+	duration?: string;
+
+	/** 发布时间 */
+	time?: string;
 
 	path?: string;
 
@@ -23,6 +33,8 @@ interface IProp {
 }
 
 export default class Video extends CodeBlack<IProp> {
+	private isViewed: boolean = false;
+
 	render(): string {
 		let { url, view, path } = this.props;
 
@@ -32,12 +44,6 @@ export default class Video extends CodeBlack<IProp> {
 			path = `I:\\videox\\note\\Movie\\4Chan\\.videos\\${url}`;
 		}
 
-		// let videoPath = this.getLocalPath(url);
-		// //如果为项目路径
-		// if (videoPath) {
-		// 	if (!path) path = this.localPath(videoPath);
-		// 	// videoPath = this.app.vault.adapter.getResourcePath(videoPath);
-		// }
 		// //本地代理路径
 		let videoPath = this.toLocalPath(path || url);
 
@@ -58,37 +64,43 @@ export default class Video extends CodeBlack<IProp> {
 			} else poster = "";
 		}
 
-		// let poster = Utils.localImg(filePath!.replace(ext, "-poster.jpg"));
-		// if (ext === ".ts") {
-		// }
-		return `<video controls="" class='w-video' style='border-radius:0px' preload="metadata" src="${video}" poster="${poster}">
+		return `<video controls="" class='w-video' style='border-radius:8px 8px 0 0' preload="metadata" src="${video}" poster="${poster}">
 			</video>`;
 	}
 
 	renderLocal(video: string, path: string) {
-		// const { name, path } = this.props;
-		// if (!path) return "";
-		const { view } = this.props;
-
-		const isRead = this.isRead;
-
 		const folder = path.substring(0, path.lastIndexOf("\\"));
 		return `<wie-area style='padding:0;gap:0;'>
 			${this.renderVideo(video)}
-			<wie-line style='padding:15px'>
-				<wie-btn onclick='play' data-path='${path}'>${SVGConst.Play}本地播放</wie-btn>
-				<wie-btn onclick='openPath' data-path='${folder}'>${
+			<wie-column style='padding:15px'>
+				${this.renderInfo()}
+				<wie-line >
+					<wie-btn onclick='play' data-path='${path}'>${SVGConst.Play}本地播放</wie-btn>
+					<wie-btn onclick='openPath' data-path='${folder}'>${
 			SVGConst.Detail
 		}打开目录</wie-btn>
-				<wie-btn onclick='ai' >${SVGConst.Refresh}AI标签分析</wie-btn>
-				<wie-btn onclick='viewed' >${SVGConst.Play}切换已播放状态</wie-btn>
-			</wie-line>
-			
+					<wie-btn onclick='ai' >${SVGConst.Refresh}AI标签分析</wie-btn>
+					<wie-btn onclick='viewed' >${SVGConst.Play}切换已播放状态</wie-btn>
+				</wie-line>
+			</wie-column>
 		</wie-area>`;
+	}
 
-		// <wie-tags>
-		// 		${isRead ? `<wie-tag-n>${SVGConst.Refresh}${view}</wie-tag-n>` : ""}
-		// 	</wie-tags>
+	renderInfo() {
+		const { name, view, type, duration, time } = this.props;
+		if (!type) return "";
+
+		return `<wie-line >
+			${this.renderItem("类型", type)}
+			${this.renderItem("观看次数", view)}
+			${this.renderItem("时长", duration)}
+			${this.renderItem("发布时间", time)}
+		</wie-line>`;
+	}
+
+	private renderItem(name: string, value?: string) {
+		if (!value) return "";
+		return `<wie-item><w-desc>${name}:</w-desc><div >${value}</div></wie-item>`;
 	}
 
 	protected async ai(el: Event) {
@@ -97,11 +109,7 @@ export default class Video extends CodeBlack<IProp> {
 
 		const { name } = this.props;
 
-		console.log("--ai--", name);
-
 		const res = await N8NTool.AITag(name);
-
-		console.log("--ai-ret-", res, res.tags);
 
 		const item = this.app.workspace.getActiveViewOfType(MarkdownView)!;
 
@@ -141,32 +149,28 @@ export default class Video extends CodeBlack<IProp> {
 		);
 
 		//检查是否已经播放过
-		setTimeout(() => {
-			this.checkCache(video);
-		}, 1);
+		this.checkIsRead(video);
 	}
 
-	private async checkCache(video: HTMLVideoElement) {
-		const exists = fs.existsSync(this.cachePath());
-
-		if (exists) this.videoEnded(video, false);
+	private async checkIsRead(video: HTMLVideoElement) {
+		this.isViewed = await Utils.isView(this.videoName);
+		if (this.isViewed) this.videoEnded(video, false);
 	}
 
 	viewed() {
 		const video = this.view?.querySelector("video") as HTMLVideoElement;
 		//如果为已播放
-		if (this.isRead) return this.videoToUnread(video);
+		if (this.isViewed) return this.videoToUnread(video);
 		this.videoEnded(video, true);
-	}
-
-	private get isRead() {
-		return fs.existsSync(this.cachePath());
 	}
 
 	videoToUnread(video: HTMLVideoElement) {
 		video.removeClass("w-video-read");
 		this.view?.querySelector("wie-tags")?.remove();
-		fs.unlinkSync(this.cachePath());
+		// 删除已读记录
+		Utils.viewDelete(this.videoName);
+		this.isViewed = false;
+		// fs.unlinkSync(this.cachePath());
 	}
 
 	videoEnded(video: HTMLVideoElement, write: boolean) {
@@ -180,7 +184,8 @@ export default class Video extends CodeBlack<IProp> {
 			);
 
 		//添加本地缓存
-		if (write) fs.writeFileSync(this.cachePath(), "1");
+		// if (write) fs.writeFileSync(this.cachePath(), "1");
+		if (write) Utils.viewed(this.videoName);
 
 		const item = this.app.workspace.getActiveViewOfType(MarkdownView);
 
@@ -205,24 +210,17 @@ export default class Video extends CodeBlack<IProp> {
 			let text = item.editor.getLine(i);
 			if (text && text.startsWith("##") && text.match(url)) {
 				item.editor.setLine(i, text.replace(url, `${url}-已播放`));
-				item.editor.setCursor({ line: i, ch: 0 });
+				if (write) item.editor.setCursor({ line: i, ch: 0 });
 				break;
 			}
 		}
 	}
 
-	private cachePath() {
+	private get videoName() {
 		let { url, path: fileName } = this.props;
 		url = url || fileName!;
 		if (!url) return "";
 		const name = path.basename(url).replace(path.extname(url), "");
-
-		return `${this.cacheFolder()}${name}`;
-	}
-
-	private cacheFolder() {
-		return (
-			this.props.cachePath ?? "I:\\videox\\note\\Movie\\4Chan\\.read\\"
-		);
+		return name;
 	}
 }
