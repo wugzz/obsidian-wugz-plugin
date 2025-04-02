@@ -3,6 +3,7 @@ import CodeBlock from "src/Base/CodeBlock";
 import Card from "src/CodeBlock/Card";
 import ChanTitle from "src/CodeBlock/ChanTitle";
 import FindVideo from "src/CodeBlock/FindVideo";
+import Image from "src/CodeBlock/Image";
 import JavCard from "src/CodeBlock/JavCard";
 import JavDashboard from "src/CodeBlock/JavDashboard";
 import JavVideo from "src/CodeBlock/JavVideo";
@@ -31,6 +32,7 @@ export default class MyPlugin extends Plugin {
 		["JavDashboard", JavDashboard],
 		["JavCard", JavCard],
 		["FindVideo", FindVideo],
+		["Image", Image],
 	];
 
 	settings: MyPluginSettings;

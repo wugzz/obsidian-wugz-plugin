@@ -10,22 +10,29 @@ interface IProp {
 	day?: string;
 	update?: string;
 
-	type?: "4chan" | "localVideo";
+	type?: "4chan" | "localVideo" | "localImage";
 
 	folder?: string;
 	title?: string;
 }
 
+const Types: any = {
+	localVideo: "视频",
+	localImage: "图片",
+};
+
 export default class ChanTitle extends CodeBlack<IProp> {
 	render(): string {
-		const { tid = "未知", count = 0, day, update } = this.props;
+		const { tid = "未知", count = 0, day, update, type } = this.props;
 		return `<wie-area><wie-line style='gap:15px'>
 ${
 	this.isChan
 		? `<wie-item><w-name>ID:</w-name><wie-bold>${tid}</wie-bold></wie-item>`
 		: ""
 }
-<wie-item><w-name>视频:</w-name><wie-bold>${count}</wie-bold></wie-item>
+<wie-item><w-name>${
+			Types[type!] ?? "视频"
+		}:</w-name><wie-bold>${count}</wie-bold></wie-item>
 <wie-item><w-name>更新:</w-name><wie-bold>${
 			Utils.formatRelativeTime(
 				update?.replace(/年|月/g, "-").replace(/日/g, "")
@@ -92,8 +99,9 @@ ${
 	}
 
 	private get isChan() {
-		const { tid = "" } = this.props;
-		if (tid === "redgif" || tid === "custom") return false;
+		const { tid = "", type } = this.props;
+		if (tid === "redgif" || tid === "custom" || (type && type !== "4chan"))
+			return false;
 		return true;
 	}
 

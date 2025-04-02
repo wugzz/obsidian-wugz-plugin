@@ -5,6 +5,7 @@ import UrlConst from "src/utils/UrlConst";
 import Utils from "src/utils/Utils";
 
 interface IProp {
+	type: "video" | "image";
 	folder?: string;
 	dir?: string;
 }
@@ -40,12 +41,15 @@ export default class FindVideo extends CodeBlack<IProp> {
 		if (btn.hasClass("loading")) return;
 		btn.addClass("loading");
 
-		const { folder } = this.props;
+		const { folder, type = "video" } = this.props;
 
 		//请求
+		let url =
+			type === "video"
+				? UrlConst.CREATE_VIDEOS_MD
+				: UrlConst.CREATE_IMAGES_MD;
 		const ret = await Utils.fetch(
-			UrlConst.CREATE_VIDEOS_MD +
-				`?path=${folder}&folder=${tFolder}&split=true`
+			`${url}?path=${folder}&folder=${tFolder}&split=true`
 		);
 
 		if (ret) {

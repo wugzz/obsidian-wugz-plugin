@@ -21,6 +21,9 @@ export default class UrlConst {
 	public static readonly CREATE_VIDEOS_MD =
 		"http://localhost:5678/webhook/createVideoMarkdown";
 
+	public static readonly CREATE_IMAGES_MD =
+		"http://localhost:5678/webhook/createImageMarkdown";
+
 	public static readonly VIEW_IS = "http://localhost:5678/webhook/viewIs";
 
 	public static readonly VIEW = "http://localhost:5678/webhook/view";

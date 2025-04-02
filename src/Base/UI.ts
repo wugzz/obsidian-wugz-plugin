@@ -14,6 +14,7 @@ export default abstract class UI<T = any, S = any> {
 	private id: string;
 
 	protected uis: Set<UI<any>> = new Set();
+	protected uisMap: Map<string, UI<any>> = new Map();
 
 	private isMount: boolean = false;
 
@@ -22,7 +23,7 @@ export default abstract class UI<T = any, S = any> {
 		this.id = "w" + Math.random().toString(36).substring(7);
 	}
 
-	setState(newState: S, update: boolean = true) {
+	setState(newState: S = {} as any, update: boolean = true) {
 		this.state = { ...this.state, ...newState };
 		if (this.isMount && update) this.update();
 	}
@@ -87,10 +88,15 @@ export default abstract class UI<T = any, S = any> {
 
 	abstract render(): string;
 
-	protected ui<T extends UI>(UI: GC<T>, props: T["props"]) {
+	protected ui<T extends UI>(UI: GC<T>, props: T["props"], id?: string) {
 		const ui = new UI(this.app, props);
 		this.uis.add(ui);
+		if (id) this.uisMap.set(id, ui);
 		return ui.template();
+	}
+
+	protected getUI(id: string) {
+		return this.uisMap.get(id);
 	}
 
 	protected open<T extends BaseModal<any>>(UI: GC<T>, props: T["props"]) {

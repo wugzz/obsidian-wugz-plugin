@@ -21,6 +21,8 @@ export interface IPageCode {
 	data: ICodeInfo;
 	/** 进入自动加载数据 */
 	load?: boolean;
+	/** 是否初始化数据时回调 */
+	initCall?: boolean;
 	updateCodeInfo?: (code: ICodeInfo) => void;
 }
 
@@ -45,19 +47,19 @@ export default class PageCode extends UI<IPageCode> {
 	/** 是否加载数据 */
 	private loading?: boolean;
 
-	private get data(): ICodeInfo {
+	get data(): ICodeInfo {
 		if (!this._data) {
 			this._data = this.props.data;
 			const cache = this.readJson();
 			if (!cache && this.props.load) this.loading = true;
 			this._data = cache ?? this._data;
+			this.props.initCall && this.props.updateCodeInfo?.(this._data!);
 		}
 		return this._data!;
 	}
 
 	private get cover() {
 		//检查是否有本地封面
-
 		let folder = this.videoFolder;
 		let name = folder + "/" + this.videoName + "-fanart.jpg";
 		if (this.videoPath && fs.existsSync(name)) return Utils.localImg(name);
@@ -77,6 +79,8 @@ export default class PageCode extends UI<IPageCode> {
 		const { code } = this.data;
 
 		const data = Utils.wrCode(code);
+
+		console.log("readJson", data);
 		//处理
 		if (!data) return;
 
@@ -85,9 +89,11 @@ export default class PageCode extends UI<IPageCode> {
 
 		//处理actors
 		if (!data.actors) return data;
+		data.actors = data.actors.filter((actor: IActor) => !!actor);
 
 		data.actors = data.actors.map((actor: IActor) => {
 			// console.log("-----sss", Utils.wrActor(actor.name), actor);
+
 			//优先获取本地
 			return Utils.wrActor(actor.name) ?? actor;
 		});
@@ -605,7 +611,7 @@ export default class PageCode extends UI<IPageCode> {
 			(
 				typeof score.num === "number"
 					? score.num > 0
-					: score.num.length > 0
+					: score.num?.length > 0
 			)
 				? `|${score.num}人点评`
 				: ""

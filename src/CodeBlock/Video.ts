@@ -30,6 +30,8 @@ interface IProp {
 	path?: string;
 
 	ext?: string;
+
+	size?: string;
 }
 
 export default class Video extends CodeBlack<IProp> {
@@ -87,7 +89,7 @@ export default class Video extends CodeBlack<IProp> {
 	}
 
 	renderInfo() {
-		const { name, view, type, duration, time } = this.props;
+		const { name, view, type, duration, time, size } = this.props;
 		if (!type) return "";
 
 		return `<wie-line >
@@ -95,6 +97,7 @@ export default class Video extends CodeBlack<IProp> {
 			${this.renderItem("观看次数", view)}
 			${this.renderItem("时长", duration)}
 			${this.renderItem("发布时间", time)}
+			${this.renderItem("大小", size)}
 		</wie-line>`;
 	}
 
