@@ -2,6 +2,7 @@ import { Notice, Plugin } from "obsidian";
 import CodeBlock from "src/Base/CodeBlock";
 import Card from "src/CodeBlock/Card";
 import ChanTitle from "src/CodeBlock/ChanTitle";
+import Copy from "src/CodeBlock/Copy";
 import FindVideo from "src/CodeBlock/FindVideo";
 import Image from "src/CodeBlock/Image";
 import JavCard from "src/CodeBlock/JavCard";
@@ -35,6 +36,7 @@ export default class MyPlugin extends Plugin {
 		["FindVideo", FindVideo],
 		["Image", Image],
 		["Url", Url],
+		["Copy", Copy],
 	];
 
 	settings: MyPluginSettings;

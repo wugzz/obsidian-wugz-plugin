@@ -114,42 +114,49 @@ export default class Video extends CodeBlack<IProp> {
 
 		const res = await N8NTool.AITag(name);
 
-		const item = this.app.workspace.getActiveViewOfType(MarkdownView)!;
+		// const item = this.app.workspace.getActiveViewOfType(MarkdownView)!;
 
-		const count = item.editor.lineCount(); // 结束位置
+		// const count = item.editor.lineCount(); // 结束位置
 
-		for (let i = 0; i < count; i++) {
-			let text = item.editor.getLine(i);
-			if (text && text.startsWith("##") && text.match(name)) {
-				// item.editor.setLine(i, text.replace(url, `${url}-已播放`));
-				// item.editor.setCursor({ line: i, ch: 0 });
-				let line = item.editor.getLine(i + 2);
-				const newTags = this.mergeTags(line, res.tags);
-				const tags = newTags.map((v) => `#${v}`).join(" ");
-				item.editor.setLine(i + 2, line + " " + tags);
-				item.editor.setCursor({ line: i + 2, ch: 0 });
-				break;
-			}
-		}
+		// for (let i = 0; i < count; i++) {
+		// 	let text = item.editor.getLine(i);
+		// 	if (text && text.startsWith("##") && text.match(name)) {
+		// 		// item.editor.setLine(i, text.replace(url, `${url}-已播放`));
+		// 		// item.editor.setCursor({ line: i, ch: 0 });
+		// 		let line = item.editor.getLine(i + 2);
+		// 		const newTags = this.mergeTags(line, res.tags);
+		// 		const tags = newTags.map((v) => `#${v}`).join(" ");
+		// 		item.editor.setLine(i + 2, line + " " + tags);
+		// 		item.editor.setCursor({ line: i + 2, ch: 0 });
+		// 		break;
+		// 	}
+		// }
+
+		this.updateContentByLine(
+			new RegExp(`^##\\s+\\d+.${name}$`, "g"),
+			(i, edtior) => [
+				i + 2,
+				this.mergeTags(edtior.getLine(i + 2), res.tags),
+			]
+		);
 
 		this.btnToNormal(btn);
 	}
 
 	private mergeTags(tagStr: string, tags: string[]) {
 		let old = tagStr.split(" ").map((v) => v.trim().replace(/#/, ""));
-		let oldSet = new Set(old);
-
-		return tags.filter((v) => !oldSet.has(v));
+		let set = new Set([...old, ...tags]);
+		return Array.from(set).join(" ");
 	}
 
 	protected onEvent(el: HTMLElement): void {
 		const video = el.querySelector("video")!;
 		if (!video) return;
 		video.volume = 0.2;
-		video.addEventListener(
-			"ended",
-			this.videoEnded.bind(this, video, true, true)
-		);
+		video.addEventListener("ended", () => {
+			if (this.isViewed) return;
+			this.videoEnded(video, true);
+		});
 
 		//检查是否已经播放过
 		this.checkIsRead(video);
@@ -187,36 +194,15 @@ export default class Video extends CodeBlack<IProp> {
 			);
 
 		//添加本地缓存
-		// if (write) fs.writeFileSync(this.cachePath(), "1");
 		if (write) Utils.viewed(this.videoName);
-
-		const item = this.app.workspace.getActiveViewOfType(MarkdownView);
-
-		if (!item) return console.log("-videoEnded-", "没有找到MarkdownView");
-
-		const content = item.editor.getValue();
 
 		let { url, name } = this.props;
 		url = url || name;
 
-		let reg = new RegExp(`${url}-已播放`, "g");
-
-		if (content.match(reg)) return;
-
-		const index = content.match(url)?.index;
-
-		if (index === undefined) return;
-
-		const count = item.editor.lineCount(); // 结束位置
-
-		for (let i = 0; i < count; i++) {
-			let text = item.editor.getLine(i);
-			if (text && text.startsWith("##") && text.match(url)) {
-				item.editor.setLine(i, text.replace(url, `${url}-已播放`));
-				if (write) item.editor.setCursor({ line: i, ch: 0 });
-				break;
-			}
-		}
+		this.updateContentByLine(
+			new RegExp(`^##\\s+\\d+.${url}$`, "g"),
+			`$&-已播放`
+		);
 	}
 
 	private get videoName() {
