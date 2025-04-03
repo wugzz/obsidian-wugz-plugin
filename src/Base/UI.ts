@@ -88,7 +88,7 @@ export default abstract class UI<T = any, S = any> {
 
 	abstract render(): string;
 
-	protected ui<T extends UI>(UI: GC<T>, props: T["props"], id?: string) {
+	protected ui<T extends UI>(UI: GC<T>, props?: T["props"], id?: string) {
 		const ui = new UI(this.app, props);
 		this.uis.add(ui);
 		if (id) this.uisMap.set(id, ui);

@@ -7,6 +7,11 @@ If your plugin does not need CSS, delete this file.
 
 */
 
+.justify-between{
+    justify-content: space-between;
+}
+
+
 .w-video{
     border-radius: 10px;
     cursor: pointer;
@@ -186,7 +191,8 @@ wie-video wie-tags{
     object-fit: cover;
 }
 
-wie-area{
+wie-area,
+wie-area-line{
     display: flex;
     flex-direction: column;
     border-radius: 8px;
@@ -198,6 +204,10 @@ wie-area{
     position: relative;
     cursor: default;
     /* background: var(--tab-container-background); */
+}
+
+wie-area-line{
+    flex-direction: row;
 }
 
 wie-center{

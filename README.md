@@ -101,4 +101,6 @@ See https://github.com/obsidianmd/obsidian-api
 
 New-Item -ItemType SymbolicLink -Path "I:\videox\note\Movie\.obsidian\plugins\obsidian-wugz-plugin" -Target "E:\workspace\obsidian-wugz-plugin"
 
+New-Item -ItemType SymbolicLink -Path "E:\笔记\wugz笔记\.obsidian\plugins\obsidian-wugz-plugin" -Target "E:\workspace\obsidian-wugz-plugin"
+
 ```

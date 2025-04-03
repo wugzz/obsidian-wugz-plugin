@@ -8,6 +8,7 @@ import JavCard from "src/CodeBlock/JavCard";
 import JavDashboard from "src/CodeBlock/JavDashboard";
 import JavVideo from "src/CodeBlock/JavVideo";
 import Tip from "src/CodeBlock/Tip";
+import Url from "src/CodeBlock/Url";
 import Video from "src/CodeBlock/Video";
 import PluginSetting from "src/PluginSetting";
 import { MediaServer } from "src/Server/MediaServer";
@@ -33,6 +34,7 @@ export default class MyPlugin extends Plugin {
 		["JavCard", JavCard],
 		["FindVideo", FindVideo],
 		["Image", Image],
+		["Url", Url],
 	];
 
 	settings: MyPluginSettings;
