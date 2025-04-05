@@ -65,7 +65,7 @@ export default class Url extends CodeBlack<IProp> {
 			this.handleLee(doc, html);
 
 			//title转义
-			title = title.replace(/\|/g, "");
+			title = title.replace(/\||\n/g, "");
 
 			this.updateProps({ title, favicon });
 		} catch (error) {

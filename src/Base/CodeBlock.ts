@@ -28,6 +28,10 @@ const parserSource = (source: string) => {
 };
 
 export default abstract class CodeBlack<T = any> extends UI<T> {
+	private get CodeName() {
+		return this.constructor.name;
+	}
+
 	constructor(
 		app: App,
 		private source: string,
@@ -52,14 +56,23 @@ export default abstract class CodeBlack<T = any> extends UI<T> {
 		let source = this.source;
 		for (const [key, value] of Object.entries(props)) {
 			(this.props as any)[key] = value;
-			const reg = new RegExp(`(${key}\\s*).*`);
+			const reg = new RegExp(`(${key})\\s*.*`);
 			if (source.match(reg)) {
-				source = source.replace(reg, `$1 ${value}`);
+				source = source.replace(reg, `${key} ${value}`).trim();
 			} else {
 				source += `\n${key} ${value}`;
 			}
 		}
-		this.updateContent([[new RegExp(this.source, "g"), source]]);
+
+		let oldContent = this.source;
+		if (oldContent) oldContent += "\n";
+
+		const oldBlock = `\`\`\`${this.CodeName}\n${oldContent}\`\`\``;
+		const newBlock = `\`\`\`${this.CodeName}\n${source.trim()}\n\`\`\``;
+
+		console.log(oldContent, source);
+
+		this.updateContent([[new RegExp(oldBlock, "g"), newBlock]]);
 		this.setState();
 	}
 
@@ -69,6 +82,10 @@ export default abstract class CodeBlack<T = any> extends UI<T> {
 	 */
 	protected get filePath() {
 		return this.localPath(this.cxt.sourcePath);
+	}
+
+	protected get rootPath() {
+		return (this.app.vault.adapter as any).basePath;
 	}
 
 	protected get fileName() {

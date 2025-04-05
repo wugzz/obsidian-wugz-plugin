@@ -1,5 +1,6 @@
 import { Notice, Plugin } from "obsidian";
 import CodeBlock from "src/Base/CodeBlock";
+import Banner from "src/CodeBlock/Banner";
 import Card from "src/CodeBlock/Card";
 import ChanTitle from "src/CodeBlock/ChanTitle";
 import Copy from "src/CodeBlock/Copy";
@@ -37,6 +38,7 @@ export default class MyPlugin extends Plugin {
 		["Image", Image],
 		["Url", Url],
 		["Copy", Copy],
+		["Banner", Banner],
 	];
 
 	settings: MyPluginSettings;

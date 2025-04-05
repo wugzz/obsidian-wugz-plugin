@@ -11,6 +11,25 @@ If your plugin does not need CSS, delete this file.
     justify-content: space-between;
 }
 
+.wie-banner{
+    object-fit: cover;
+    object-position: center;
+    height: 250px;
+    width: 100%;
+    margin: 0px auto;
+    /* ding wei */
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    /* jian bian */
+    -webkit-mask-image: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 1)), to(rgba(0, 0, 0, 0)));
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+    opacity: 0.6;
+    border-radius: 0px !important;
+    pointer-events: none;
+}
+
 
 .w-video{
     border-radius: 10px;
@@ -79,7 +98,7 @@ If your plugin does not need CSS, delete this file.
 .w-banner{
     object-fit: cover;
     object-position: center;
-    height: 250px;
+    height: 260px;
     width: 100%;
     margin: 0px auto;
     /* ding wei */
@@ -92,6 +111,7 @@ If your plugin does not need CSS, delete this file.
     mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
     opacity: 0.6;
     border-radius: 0px !important;
+
 }
 
 .items-center{
@@ -147,6 +167,18 @@ wie-grid{
     --wie-color:#333;
     --wie-desc:#999;
     --wie-background:#FFF;
+}
+
+.wie-absolute{
+    contain: paint !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.markdown-source-view.mod-cm6 .cm-content > [contenteditable=false].wie-absolute{
+    contain: none !important;
 }
 
 .wie-full{
