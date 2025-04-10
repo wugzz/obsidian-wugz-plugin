@@ -1,4 +1,4 @@
-import { Notice, Plugin } from "obsidian";
+import { App, Notice, Plugin } from "obsidian";
 import CodeBlock from "src/Base/CodeBlock";
 import Banner from "src/CodeBlock/Banner";
 import Card from "src/CodeBlock/Card";
@@ -47,8 +47,12 @@ export default class MyPlugin extends Plugin {
 
 	private serverRunning: boolean = false;
 
+	public static App: App;
+
 	async onload() {
 		await this.loadSettings();
+
+		MyPlugin.App = this.app;
 
 		//注册组件
 		// WCard.register("w-card");
@@ -62,6 +66,9 @@ export default class MyPlugin extends Plugin {
 	}
 
 	private initServer() {
+		//判读是否笔记名为Movie,才启动服务
+		if (this.app.vault.getName() !== "Movie") return;
+		console.log("Starting server...");
 		this.server = new MediaServer(1234);
 		try {
 			this.server.startServer();

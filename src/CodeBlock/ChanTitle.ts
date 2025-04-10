@@ -14,6 +14,7 @@ interface IProp {
 
 	folder?: string;
 	title?: string;
+	dir?: string;
 }
 
 const Types: any = {
@@ -23,7 +24,7 @@ const Types: any = {
 
 export default class ChanTitle extends CodeBlack<IProp> {
 	render(): string {
-		const { tid = "未知", count = 0, day, update, type } = this.props;
+		const { tid = "未知", count = 0, day, update, type, dir } = this.props;
 		return `<wie-area><wie-line style='gap:15px'>
 ${
 	this.isChan
@@ -40,7 +41,11 @@ ${
 		}</wie-bold></wie-item>
 
 		${this.renderChanOpt()}
-	${this.renderLocalVideos()}
+		${this.renderLocalVideos()}
+		${this.checkRender(
+			dir,
+			`<wie-btn onclick='openPath' data-path='${dir}'>${SVGConst.Search}打开目录</wie-btn>`
+		)}
 		</wie-line>
 	</wie-area>`;
 	}
@@ -48,8 +53,8 @@ ${
 	renderChanOpt() {
 		if (!this.isChan) return "";
 		const { tid = "未知", count = 0, day } = this.props;
-		return `<wie-item><a class='wie-btn' target='_blank' href='https://boards.4chan.org/gif/thread/${tid}?day=${day}&count=${count}'>4Chan</a></wie-item>
-		<wie-item><a class='wie-btn' target='_blank' href='https://archived.moe/gif/thread/${tid}?day=${day}&count=${count}'>Archived</a></wie-item>
+		return `<wie-item><a class='wie-btn' target='_blank' href='https://boards.4chan.org/gif/thread/${tid}'>4Chan</a></wie-item>
+		<wie-item><a class='wie-btn' target='_blank' href='https://archived.moe/gif/thread/${tid}'>Archived</a></wie-item>
 		`;
 		//<wie-item><wie-btn class='loading'>${SVGConst.Refresh}检查更新中</wie-btn></wie-item>
 	}

@@ -1,6 +1,9 @@
 import * as http from "http";
 import * as fs from "fs";
 import * as path from "path";
+import { App, TFile } from "obsidian";
+import MyPlugin from "main";
+import OFile from "src/utils/File";
 
 export class MediaServer {
 	private server: http.Server | null = null;
@@ -12,6 +15,11 @@ export class MediaServer {
 
 	startServer() {
 		this.server = http.createServer((req, res) => {
+			// 设置 CORS 头部，允许所有源访问
+			res.setHeader("Access-Control-Allow-Origin", "*"); // 允许所有来源
+			res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // 允许的 HTTP 方法
+			res.setHeader("Access-Control-Allow-Headers", "Content-Type"); // 允许的请求头
+
 			if (!req.url) {
 				res.writeHead(400, { "Content-Type": "text/plain" });
 				res.end("Bad Request");
@@ -20,6 +28,11 @@ export class MediaServer {
 
 			const urlParams = new URLSearchParams(req.url.split("?")[1] || "");
 			const filePath = urlParams.get("q");
+
+			// console.log("请求的文件路径:", filePath, req.url);
+			if (req.url.startsWith("/search")) {
+				return this.search(res as any, filePath!);
+			}
 
 			if (!filePath) {
 				res.writeHead(400, { "Content-Type": "text/plain" });
@@ -106,8 +119,49 @@ export class MediaServer {
 		});
 
 		this.server.listen(this.port, "0.0.0.0", () => {
-			console.log(`Media server running on port ${this.port}`);
+			console.log(`本地视频转发服务已启动 端口:${this.port}`);
 		});
+	}
+
+	search(res: any, name?: string) {
+		res.writeHead(200, { "Content-Type": "application/json" });
+
+		if (!name) {
+			//返回json
+			res.end(JSON.stringify({ success: false, msg: "没有文件名" }));
+			return;
+		}
+		//转义
+		name = decodeURIComponent(name);
+		console.log("搜索文件:", name);
+		const app = MyPlugin.App;
+		const files = app.vault.getFiles();
+		let tfile: TFile | undefined = undefined;
+		for (let file of files) {
+			if (file.name.match(new RegExp(name, "g"))) {
+				//判读时间
+				if (!tfile || file.stat.ctime > tfile.stat.ctime) {
+					tfile = file;
+				}
+				// console.log("找到文件:", file);
+				//return
+			}
+		}
+		if (tfile) {
+			res.end(
+				JSON.stringify({
+					success: true,
+					data: {
+						path: OFile.localPath(tfile.path),
+						name: tfile.name,
+						folder: OFile.localPath(tfile.parent?.path ?? ""),
+					},
+				})
+			);
+		} else
+			res.end(
+				JSON.stringify({ success: false, msg: "没有找到文件", name })
+			);
 	}
 
 	stopServer() {

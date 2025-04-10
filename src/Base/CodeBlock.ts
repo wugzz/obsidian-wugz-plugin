@@ -165,7 +165,8 @@ export default abstract class CodeBlack<T = any> extends UI<T> {
 		match: RegExp,
 		content:
 			| string
-			| ((line: number, edtior: Editor) => [i: number, text: string])
+			| ((line: number, edtior: Editor) => [i: number, text: string]),
+		cursor: boolean = true
 	) {
 		const item = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!item) return;
@@ -181,7 +182,7 @@ export default abstract class CodeBlack<T = any> extends UI<T> {
 					text = text.replace(match, content);
 				}
 				item.editor.setLine(i, text);
-				item.editor.setCursor({ line: i, ch: 0 });
+				if (cursor) item.editor.setCursor({ line: i, ch: 0 });
 				break;
 			}
 		}

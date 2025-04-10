@@ -3,6 +3,7 @@ import * as path from "path";
 import { BaseModal } from "src/Modal/BaseModal";
 import Utils from "src/utils/Utils";
 import * as fs from "fs";
+import { StringifyOptions } from "querystring";
 
 type GC<T = unknown> = new (...args: any[]) => T;
 
@@ -159,5 +160,10 @@ export default abstract class UI<T = any, S = any> {
 
 	protected btnToNormal(btn: HTMLElement) {
 		btn?.removeClass("loading");
+	}
+
+	protected checkRender(v: any, content: string) {
+		if (Array.isArray(v) ? v.length === 0 : !v) return "";
+		else return content;
 	}
 }

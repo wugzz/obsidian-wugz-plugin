@@ -201,7 +201,8 @@ export default class Video extends CodeBlack<IProp> {
 
 		this.updateContentByLine(
 			new RegExp(`^##\\s+\\d+.${url}$`, "g"),
-			`$&-已播放`
+			`$&-已播放`,
+			write
 		);
 	}
 
