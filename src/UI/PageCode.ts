@@ -16,6 +16,7 @@ import * as fs from "fs";
 import { Notice } from "obsidian";
 import { ImageModal } from "src/Modal/ImageModal";
 import UIActor from "./UIActor";
+import N8NTool, { IDownFile } from "src/utils/N8NTool";
 
 export interface IPageCode {
 	data: ICodeInfo;
@@ -73,6 +74,10 @@ export default class PageCode extends UI<IPageCode> {
 		}
 		//判读是否为
 		return cover && Utils.proxyImg(cover!);
+	}
+
+	private get hasDownImage() {
+		return !!this.cover?.startsWith("http://localhost:5678");
 	}
 
 	private readJson() {
@@ -142,6 +147,7 @@ export default class PageCode extends UI<IPageCode> {
                     ${data.zh ? `<wie-tag>中字</wie-tag>` : ""}
                     ${data.leak ? `<wie-tag>英字</wie-tag>` : ""}
                     ${data.und ? `<wie-tag>4K</wie-tag>` : ""}
+					${!this.hasDownImage ? `<wie-tag class='red'>图片未下载</wie-tag>` : ""}
                     ${this.renderScore("JavDB", data.score)}
                     <wie-item>${SVGConst.Publish} ${
 			data.releaseDate ?? "??"
@@ -210,43 +216,64 @@ export default class PageCode extends UI<IPageCode> {
 
 		btn.addClass("loading");
 
+		const images: IDownFile[] = [];
+
 		const { preview = [] } = this.data;
 
 		let fail: number = 0;
 		for (let i = 0; i < preview.length; i++) {
 			const url = preview[i];
 			const path = this.videoFolder + "/extrafanart";
-			let item = await Utils.download(
+			images.push({
 				url,
-				path,
-				"extrafanart-" + (i + 1) + ".jpg"
-			);
-			if (!item) fail++;
+				folder: path,
+				name: "extrafanart-" + (i + 1) + ".jpg",
+			});
+			// let item = await Utils.download(
+			// 	url,
+			// 	path,
+			// 	"extrafanart-" + (i + 1) + ".jpg"
+			// );
+			// if (!item) fail++;
 		}
 		//处理封面图
 		let { image, cover } = this.data;
 		if (cover && this.videoPath) {
-			let item = await Utils.download(
-				cover,
-				this.videoFolder!,
-				this.videoName + "-fanart.jpg"
-			);
-			if (!item) fail++;
+			images.push({
+				url: cover,
+				folder: this.videoFolder!,
+				name: this.videoName + "-fanart.jpg",
+			});
+			// let item = await Utils.download(
+			// 	cover,
+			// 	this.videoFolder!,
+			// 	this.videoName + "-fanart.jpg"
+			// );
+			// if (!item) fail++;
 		}
 		//处理大图
 		if (image && this.videoPath) {
-			let item = await Utils.download(
-				image,
-				this.videoFolder!,
-				"image.jpg"
-			);
-			if (!item) fail++;
+			images.push({
+				url: image,
+				folder: this.videoFolder!,
+				name: "image.jpg",
+			});
+
+			// let item = await Utils.download(
+			// 	image,
+			// 	this.videoFolder!,
+			// 	"image.jpg"
+			// );
+			// if (!item) fail++;
 		}
-		if (fail > 0) {
-			new Notice("下载失败" + fail + "个，请重试");
-			btn.removeClass("loading");
-			return;
-		}
+		// if (fail > 0) {
+		// 	new Notice("下载失败" + fail + "个，请重试");
+		// 	btn.removeClass("loading");
+		// 	return;
+		// }
+
+		// const path = this.videoFolder + "/extrafanart";
+		await N8NTool.downImages("下载图片", images);
 
 		this.setState({});
 		new Notice("下载完成");

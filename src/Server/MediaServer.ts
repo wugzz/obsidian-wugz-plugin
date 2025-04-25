@@ -137,8 +137,9 @@ export class MediaServer {
 		const app = MyPlugin.App;
 		const files = app.vault.getFiles();
 		let tfile: TFile | undefined = undefined;
+		let match = new RegExp(name.replace(/[\[\]\(\)]/g, ""), "g");
 		for (let file of files) {
-			if (file.name.match(new RegExp(name, "g"))) {
+			if (file.name.replace(/[\[\]\(\)]/g, "").match(match)) {
 				//判读时间
 				if (!tfile || file.stat.ctime > tfile.stat.ctime) {
 					tfile = file;

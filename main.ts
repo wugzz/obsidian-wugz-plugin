@@ -1,4 +1,4 @@
-import { App, Notice, Plugin } from "obsidian";
+import { App, Component, MarkdownRenderChild, Notice, Plugin } from "obsidian";
 import CodeBlock from "src/Base/CodeBlock";
 import Banner from "src/CodeBlock/Banner";
 import Card from "src/CodeBlock/Card";
@@ -9,6 +9,7 @@ import Image from "src/CodeBlock/Image";
 import JavCard from "src/CodeBlock/JavCard";
 import JavDashboard from "src/CodeBlock/JavDashboard";
 import JavVideo from "src/CodeBlock/JavVideo";
+import Read from "src/CodeBlock/Read";
 import Tip from "src/CodeBlock/Tip";
 import Url from "src/CodeBlock/Url";
 import Video from "src/CodeBlock/Video";
@@ -39,6 +40,7 @@ export default class MyPlugin extends Plugin {
 		["Url", Url],
 		["Copy", Copy],
 		["Banner", Banner],
+		["Read", Read],
 	];
 
 	settings: MyPluginSettings;
@@ -88,6 +90,17 @@ export default class MyPlugin extends Plugin {
 					ctx
 				);
 				codeBlock.mount(el);
+
+				const comp = new MyCodeBlockChild(el);
+				comp.onunload = () => {
+					// console.log("-----卸载了--", name, codeBlock);
+					codeBlock.unmount();
+				};
+				ctx.addChild(comp);
+				// return () => {
+				// 	console.log("-----卸载了--", name, codeBlock);
+				// 	codeBlock.unmount();
+				// };
 			});
 		}
 		// this.registerMarkdownPostProcessor
@@ -108,4 +121,14 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+}
+
+class MyCodeBlockChild extends MarkdownRenderChild {
+	constructor(containerEl: HTMLElement) {
+		super(containerEl);
+	}
+
+	onload() {}
+
+	onunload() {}
 }

@@ -6,6 +6,7 @@ import * as fs from "fs";
 import SVGConst from "./SVGConst";
 import GFriends from "src/utils/GFriends";
 import { ActorModal } from "src/Modal/ActorModal";
+import N8NTool, { IDownFile } from "src/utils/N8NTool";
 
 interface IProps {
 	actor: IActor;
@@ -81,6 +82,9 @@ export default class UIActor extends UI<IProps> {
 							? `<wie-btn onclick='openDetail'>${SVGConst.Delete}详情</wie-btn>`
 							: ""
 					}
+					<wie-btn onclick='openPath' data-path='${UrlConst.CACHE_ACTORS_PATH}'>${
+			SVGConst.Detail
+		}演员缓存目录</wie-btn>
                     <wie-btn onclick='updateActor'>${
 						SVGConst.Refresh
 					} 更新信息</wie-btn>
@@ -135,22 +139,26 @@ export default class UIActor extends UI<IProps> {
 
 			Utils.wrActor(actor.name, actor);
 
+			const images: IDownFile[] = [];
+
 			//同步下载视频图片
 			if (actor.cover) {
-				await Utils.download(
-					Utils.proxyImg(actor.cover),
-					`${UrlConst.CACHE_ACTORS_PATH}`,
-					`${actor.name}-cover.jpg`
-				);
+				images.push({
+					url: Utils.proxyImg(actor.cover),
+					folder: UrlConst.CACHE_ACTORS_PATH,
+					name: `${actor.name}-cover.jpg`,
+				});
 			}
 			//同步小图
 			if (actor.avatar) {
-				await Utils.download(
-					actor.avatar,
-					`${UrlConst.CACHE_ACTORS_PATH}`,
-					`${actor.name}-avatar.jpg`
-				);
+				images.push({
+					url: actor.avatar,
+					folder: UrlConst.CACHE_ACTORS_PATH,
+					name: `${actor.name}-avatar.jpg`,
+				});
 			}
+
+			await N8NTool.downImages("下载演员图片", images);
 
 			btn.removeClass("loading");
 			this.setState({});

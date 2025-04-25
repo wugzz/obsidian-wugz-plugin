@@ -23,7 +23,7 @@ export default class Copy extends CodeBlack<IProp> {
 	}
 
 	copy() {
-		copy(this.props.title);
+		copy(this.props.content);
 		new Notice("复制成功");
 	}
 }

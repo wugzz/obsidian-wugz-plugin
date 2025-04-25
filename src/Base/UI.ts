@@ -19,6 +19,8 @@ export default abstract class UI<T = any, S = any> {
 
 	private isMount: boolean = false;
 
+	private subs: Set<() => void> = new Set();
+
 	constructor(protected app: App, readonly props: T = {} as any) {
 		this.view = null;
 		this.id = "w" + Math.random().toString(36).substring(7);
@@ -40,6 +42,21 @@ export default abstract class UI<T = any, S = any> {
 
 	protected async onMount() {}
 
+	protected onDestroy() {}
+
+	protected setTimeout(callback: () => void, time: number) {
+		let timer = setTimeout(() => {
+			callback();
+			this.subs.delete(sub);
+		}, time);
+
+		let sub = () => {
+			if (timer) clearTimeout(timer);
+		};
+
+		this.subs.add(sub);
+	}
+
 	protected onEvent(view: HTMLElement) {}
 
 	template(): string {
@@ -51,6 +68,10 @@ export default abstract class UI<T = any, S = any> {
 			this.view.remove();
 			this.view = null;
 		}
+		//清除定时器
+		this.subs.forEach((sub) => sub());
+		this.onDestroy();
+		this.uis.forEach((ui) => ui.unmount());
 	}
 
 	private update() {
@@ -165,5 +186,10 @@ export default abstract class UI<T = any, S = any> {
 	protected checkRender(v: any, content: string) {
 		if (Array.isArray(v) ? v.length === 0 : !v) return "";
 		else return content;
+	}
+
+	protected async getFileContent(filePath: string) {
+		fs.readFileSync(filePath, "utf-8");
+		fs.writeFileSync(filePath, "232", "utf-8");
 	}
 }

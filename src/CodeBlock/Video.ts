@@ -152,7 +152,7 @@ export default class Video extends CodeBlack<IProp> {
 	protected onEvent(el: HTMLElement): void {
 		const video = el.querySelector("video")!;
 		if (!video) return;
-		video.volume = 0.2;
+		video.volume = 0.5;
 		video.addEventListener("ended", () => {
 			if (this.isViewed) return;
 			this.videoEnded(video, true);

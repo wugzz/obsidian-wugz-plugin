@@ -159,8 +159,6 @@ wie-grid{
     --wie-background:#FFF;
 }
 
-
-
 .w-page-code{
     color: #333;
     cursor: default;
@@ -170,7 +168,7 @@ wie-grid{
 }
 
 .wie-absolute{
-    contain: paint !important;
+    /* contain: paint !important; */
     position: absolute !important;
     top: 0;
     left: 0;
@@ -347,7 +345,21 @@ wie-tag-z{
     display: flex;
     align-items: center;
     gap: 5px;
+    font-weight: bold;
 }
+
+wie-tag.red{
+    background: red;
+}
+
+.w-emby{
+  position: absolute;
+  right: 0;
+  top: 13px;
+  width: 100px;
+}
+
+
 wie-tag svg,
 wie-tag-n svg{
     height: 14px;

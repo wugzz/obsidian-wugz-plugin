@@ -1,3 +1,26 @@
+export interface IDownFile {
+	folder?: string;
+	name?: string;
+	url: string;
+}
+
+export interface IObFile {
+	/**
+	 * 文件路径
+	 */
+	path: string;
+	/**
+	 * 文件名
+	 */
+	name: string;
+	/**
+	 * 目录
+	 */
+	folder: string;
+
+	type: string;
+}
+
 export default class N8NTool {
 	/** 缓存目录 */
 	static CachePath = ".cache/jav/";
@@ -46,5 +69,24 @@ export default class N8NTool {
 		} catch (e) {
 			return { success: false, message: e.message };
 		}
+	}
+
+	static async downImages(title: string, images: IDownFile[]) {
+		const data = new FormData();
+		title = title.replace(/[\|\"\']/g, "");
+		data.append("title", title);
+		data.append("wemb", JSON.stringify(images));
+
+		await fetch("http://localhost:5678/webhook/downComic", {
+			method: "POST",
+			body: data,
+		});
+	}
+
+	static async findInOb(
+		title: string
+	): Promise<{ success: boolean; data: IObFile }> {
+		let data = await fetch(`http://127.0.0.1:1234/search?q=${title}`);
+		return await data.json();
 	}
 }
