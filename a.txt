@@ -1,0 +1,368 @@
+MoveTo  6755, 1500
+MoveTo  6855, 1500
+MoveTo  6955, 1500
+MoveTo  7055, 1500
+MoveTo  7155, 1500
+MoveTo  7255, 1500
+MoveTo  7355, 1500
+MoveTo  7455, 1500
+
+
+6750, 1120
+6870, 1120
+6990, 1120
+7110, 1120
+7230, 1120
+7350, 1120
+7470, 1120
+7590, 1120
+
+
+
+'==========以下是按键精灵录制的内容==========
+'=分解按钮
+MoveTo 5070, 760
+Delay 1
+LeftClick 1
+'=分解按钮
+MoveTo 4239, 300
+Delay 1
+LeftClick 1
+
+'=分解第一行第一个装备
+MoveTo 6750, 1000
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第一行第二个装备
+MoveTo 6870, 1000
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第一行第三个装备
+MoveTo 6990, 1000
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第一行第四个装备
+MoveTo 7110, 1000
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第一行第五个装备
+MoveTo 7230, 1000
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第一行第六个装备
+MoveTo 7350, 1000
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第一行第七个装备
+MoveTo 7470, 1000
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第一行第八个装备
+MoveTo 7590, 1000
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+
+'=分解第二行第一个装备
+MoveTo 6750, 1120
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第二行第二个装备
+MoveTo 6870, 1120
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第二行第三个装备
+MoveTo 6990, 1120
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第二行第四个装备
+MoveTo 7110, 1120
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第二行第五个装备
+MoveTo 7230, 1120
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第二行第六个装备
+MoveTo 7350, 1120
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第二行第七个装备
+MoveTo 7470, 1120
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第二行第八个装备
+MoveTo 7590, 1120
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+
+'=分解第三行第一个装备
+MoveTo 6750, 1240
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第三行第二个装备
+MoveTo 6870, 1240
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第三行第三个装备
+MoveTo 6990, 1240
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第三行第四个装备
+MoveTo 7110, 1240
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+'=分解第三行第五个装备
+MoveTo 7230, 1240
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第三行第六个装备
+MoveTo 7350, 1240
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第三行第七个装备
+MoveTo 7470, 1240
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第三行第八个装备
+MoveTo 7590, 1240
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+
+'=分解第四行第一个装备
+MoveTo 6750, 1360
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第四行第二个装备
+MoveTo 6870, 1360
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第四行第三个装备
+MoveTo 6990, 1360
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第四行第四个装备
+MoveTo 7110, 1360
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+'=分解第四行第五个装备
+MoveTo 7230, 1360
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第四行第六个装备
+MoveTo 7350, 1360
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第四行第七个装备
+MoveTo 7470, 1360
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第四行第八个装备
+MoveTo 7590, 1360
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+
+'=分解第五行第一个装备
+MoveTo 6750, 1480
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第五行第二个装备
+MoveTo 6870, 1480
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第五行第三个装备
+MoveTo 6990, 1480
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第五行第四个装备
+MoveTo 7110, 1480
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+'=分解第五行第五个装备
+MoveTo 7230, 1480
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第五行第六个装备
+MoveTo 7350, 1480
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第五行第七个装备
+MoveTo 7470, 1480
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第五行第八个装备
+MoveTo 7590, 1480
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+
+'=分解第六行第一个装备
+MoveTo 6750, 1600
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第六行第二个装备
+MoveTo 6870, 1600
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第六行第三个装备
+MoveTo 6990, 1600
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第六行第四个装备
+MoveTo 7110, 1600
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+'=分解第六行第五个装备
+MoveTo 7230, 1600
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第六行第六个装备
+MoveTo 7350, 1600
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第六行第七个装备
+MoveTo 7470, 1600
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1
+'=分解第六行第八个装备
+MoveTo 7590, 1600
+Delay 1
+LeftClick 1
+Delay 1
+KeyPress "Enter", 1
+Delay 1

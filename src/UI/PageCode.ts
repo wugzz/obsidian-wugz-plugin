@@ -161,6 +161,13 @@ export default class PageCode extends UI<IPageCode> {
 					"JavDB",
 					SVGConst.Detail
 				)}
+				${this.renderButton(
+					data as any,
+					"link",
+					"Missav",
+					SVGConst.Detail,
+					`https://missav.ai/search/${data.code}`
+				)}
                 <wie-btn onclick='updateCode' class='${this.loadingClass}'>${
 			SVGConst.Refresh
 		}更新番号信息</wie-btn>
